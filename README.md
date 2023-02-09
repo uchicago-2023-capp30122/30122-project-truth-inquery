@@ -1,1 +1,14 @@
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-c66648af7eb3fe8bc4f294546bfd86ef473780cde1dea487d3c4ff354943c9ae.svg)](https://classroom.github.com/online_ide?assignment_repo_id=9903374&assignment_repo_type=AssignmentRepo)
+# Project Truth InQuery
+
+## Data Sources
+### Abortion Policy API
+
+### Data collection
+1. We collect data from crisis pregnancy center (CPC) websites and up to 50 URLs to which the base CPC website links. 
+We use data from the advocacy organization ([Expose Fake Clincs](https://www.exposefakeclinics.com/)) which contains information on CPCs by state. 
+
+2. We collect and clean data in the same way using networks of URLs of real healthcare clinics providing reproductive and contraceptive care which come from ([placeholder](https://www.github.com/)). 
+
+### Data Cleaning
+1. Tokens are collected and counted if they do not contain characters matching `r'\W+'`.
+2. Tokens are aggregated by state and saved in CSV files.
