@@ -3,14 +3,34 @@ import lxml.html
 import pandas as pd
 import re
 import scrapelib
-from crawler.clean_data import clean_df
+from .clean_data import clean_df
 s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
+# implement timeout feature
+import time
+
+
+"""
+Change state crawl function to work as network crawl function
+that works with a list of urls as inputs (extract URLs outside of function from state files)
+- maybe generate ahref lists in separate helper function.
+
+zip codes:
+- we can visualize where the CPCs are at the state-level using maps (plotly, geo spacial data)
+- top tokens by state
+
+CPC ZIP CODE, potentially look up the zip code that is captured in the Abortion Finder website
+
+- Seaborn
+- mapping
+- work with data interactively in jupyter notebooks 
+i.e., import your two datasets in a different notebook
+"""
+
 
 INDEX_IGNORE = (
     "a",
     "an",
     "and",
-    "&",
     "are",
     "as",
     "at",
@@ -35,7 +55,7 @@ INDEX_IGNORE = (
     "with"
 )
 
-def extract_urls(input_file):
+def csv_extract(input_file):
     """
     Loads .csv input file and extracts 'Website'
     column to convert to list of urls to iterate over
@@ -47,7 +67,9 @@ def extract_urls(input_file):
     """
     f = pd.read_csv(input_file)
     df = f[f['Website'].notna()]
-    return df['Website'].tolist()
+    df = df[['Website','Zip Code']]
+    df = df.rename(columns={'Website':'url','Zip Code':'zip'})
+    return df
     
 def get_root(url):
     """
@@ -70,9 +92,7 @@ def tokenize(root):
     Tokens are created by iterating over all text 
     elements (regardless of tag - needs refinement), on a website.
 
-    Tokens are stripped of special characters and converted to lowercase.
-    The tokens and frequencies are stored as key, value pairs in a dictionary.
-
+    Currently: tokens are selected by excluding anything with a special character
     Inputs:
         HTML 'Root' element from a website from which text is scraped
     
@@ -126,33 +146,31 @@ def crawl(url, limit):
 
     return pd.DataFrame(dct)
 
-def state_crawl(input_file, limit=15):
+def network_crawl(urllst, outpath, limit=15):
     """
-    Takes state-level csv file containing column of website URLs 
-    and scrapes up to the limit of URLs that are connected to each base url.
+    Takes in URL list as list of base urls and crawls up to 
+    the limit # of adjacent URLs (one click away)
 
     Writes data to CSV
 
     Inputs
-        - input_file (str): file path to CSV file containing URL data
+        - urllst (list of strings): URLs to loop through
         - limit (int): maximum number of links to be scraped for each
                         base url
 
     Returns: None, creates csv file
     """
     b = 1
-    output = input_file.replace('data','output')
-    output = output.replace('.csv',' cleaned.csv')
-    base_urls = extract_urls(input_file)
-    df = clean_df(crawl(base_urls[0], limit)).add_suffix('_0')
+    df = clean_df(crawl(urllst[0], limit))
 
-    for i, b_url in enumerate(base_urls[1:]):
+    for i, b_url in enumerate(urllst[1:]):
         print("Base URL", b, "crawling")
         new_df = clean_df(crawl(b_url, limit))
-        df = df.join(new_df.add_suffix('_' + str(i+1)), how='outer')
+        df = df.join(new_df.add_suffix(str(i+1)), how='outer')
         df = df.fillna(0)
-        print("Base URL", b, "finished")
+        print("Finished")
         b += 1
-
-    df.to_csv(output)
+    # Row-wise sum, one column of token counts by state
+    df = clean_df(df)
+    df.to_csv(outpath)
     print("CSV saved")

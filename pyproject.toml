@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "truth-inquery"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "truth_inquery"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+lxml = "^4.9.2"
+ipython = "^8.10.0"
+regex = "^2022.10.31"
+scrapelib = "^2.1.0"
+
+[tool.poetry.group.dev.dependencies]
+urllib3 = "^1.26.14"
+selenium = "^4.8.0"
+pandas = "^1.5.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
