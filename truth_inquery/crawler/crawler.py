@@ -3,7 +3,6 @@ import lxml.html
 import pandas as pd
 import re
 import scrapelib
-from .clean_data import clean_df
 s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
 # implement timeout feature
 import time
@@ -54,6 +53,16 @@ INDEX_IGNORE = (
     "will",
     "with"
 )
+
+def clean_df(df):
+    """
+        Clean pd dataframe. replace NaN with 0.
+        collapse columns into joint columns by summing key total
+    """
+    output = df.fillna(0)
+    output['Total'] = df.sum(axis=1)
+    output = output[['Total']]
+    return output
 
 def csv_extract(input_file):
     """
@@ -174,3 +183,22 @@ def network_crawl(urllst, outpath, limit=15):
     df = clean_df(df)
     df.to_csv(outpath)
     print("CSV saved")
+
+if __name__ == "__main__":
+    print("main")
+    # CPC sites
+    cpcinput = ["truth_inquery/data/Illinois (IL).csv"]
+    # inputs = ["data/Alabama (AL).csv", "data/Delaware (DE).csv", "data/Arizona (AZ).csv",  "data/Colorado (CO).csv",  "data/Mississippi (MS).csv",]
+    for f in cpcinput:
+        outpath = f.replace('data','output')
+        outpath = outpath[:-9] + " tokens.csv"
+        df = csv_extract(f)
+        urls = df['url'].tolist()
+        network_crawl(urls, outpath, limit = 50)
+
+    # Healthcare sites
+    zips =  df['zip'].tolist()
+    hcurl = "https://www.fpachicago.com"
+    hcinput = [hcurl]
+    outpath = "output/hc_crawl.csv"
+    network_crawl(hcinput, outpath, limit = 50)
