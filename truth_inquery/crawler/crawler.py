@@ -185,7 +185,7 @@ def network_crawl(urllst, outpath, limit=15):
     print("CSV saved")
 
 if __name__ == "__main__":
-    print("main")
+
     # CPC sites
     cpcinput = ["truth_inquery/data/Illinois (IL).csv"]
     # inputs = ["data/Alabama (AL).csv", "data/Delaware (DE).csv", "data/Arizona (AZ).csv",  "data/Colorado (CO).csv",  "data/Mississippi (MS).csv",]
@@ -198,7 +198,9 @@ if __name__ == "__main__":
 
     # Healthcare sites
     zips =  df['zip'].tolist()
-    hcurl = "https://www.fpachicago.com"
-    hcinput = [hcurl]
-    outpath = "output/hc_crawl.csv"
-    network_crawl(hcinput, outpath, limit = 50)
+    # Use zips to generate base URLs
+    # call network crawl on hcp URLs
+    # hcurl = "https://www.fpachicago.com"
+    # hcinput = [hcurl]
+    # outpath = "output/hc_crawl.csv"
+    # network_crawl(hcinput, outpath, limit = 50)
