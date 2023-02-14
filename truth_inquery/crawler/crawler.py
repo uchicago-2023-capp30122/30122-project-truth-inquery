@@ -1,11 +1,12 @@
-from urllib.error import HTTPError
 import lxml.html
 import pandas as pd
 import re
 import scrapelib
-s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
-# implement timeout feature
 import time
+from urllib.error import HTTPError
+from hcp_urls import get_hcp_base
+s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
+
 
 
 """
@@ -77,7 +78,10 @@ def csv_extract(input_file):
     f = pd.read_csv(input_file)
     df = f[f['Website'].notna()]
     df = df[['Website','Zip Code']]
+    
     df = df.rename(columns={'Website':'url','Zip Code':'zip'})
+    df['zip'] = df['zip'].astype(str)
+    df['zip'] = df['zip'].str.zfill(5)
     return df
     
 def get_root(url):
@@ -109,9 +113,9 @@ def tokenize(root):
     pairs from website.
     """
     tokens = {} 
-    pattern = re.compile(r'\W+')
+    pattern = re.compile(r'[0-9()="?!}{<>.,~`@#$%&*^_+:;|]')
     all_text = ''.join(root.itertext())
-
+    timeout = time.time() + 60*5   # 5 minutes from now
     for key in all_text.split():
         str_key = str(key).lower()
         if re.search(pattern, str_key) is not None:
@@ -122,6 +126,8 @@ def tokenize(root):
                 tokens[str_key] = 1
             else:
                 tokens[str_key] += 1
+        if time.time() > timeout:
+            return tokens
     return tokens
 
 def crawl(url, limit):
@@ -143,7 +149,7 @@ def crawl(url, limit):
 
     dct['base'] = tokenize(root)
     urls = set(root.xpath('//a/@href'))
-
+    
     for u in urls:
         subroot = get_root(u)
         if subroot is not None:
@@ -170,7 +176,9 @@ def network_crawl(urllst, outpath, limit=15):
     Returns: None, creates csv file
     """
     b = 1
+    # print("Base URL", b, "crawling")
     df = clean_df(crawl(urllst[0], limit))
+    # print("Finished")
 
     for i, b_url in enumerate(urllst[1:]):
         print("Base URL", b, "crawling")
@@ -181,26 +189,40 @@ def network_crawl(urllst, outpath, limit=15):
         b += 1
     # Row-wise sum, one column of token counts by state
     df = clean_df(df)
+    df = df.reset_index()
     df.to_csv(outpath)
     print("CSV saved")
+    return df
 
 if __name__ == "__main__":
 
-    # CPC sites
-    cpcinput = ["truth_inquery/data/Illinois (IL).csv"]
-    # inputs = ["data/Alabama (AL).csv", "data/Delaware (DE).csv", "data/Arizona (AZ).csv",  "data/Colorado (CO).csv",  "data/Mississippi (MS).csv",]
-    for f in cpcinput:
-        outpath = f.replace('data','output')
-        outpath = outpath[:-9] + " tokens.csv"
-        df = csv_extract(f)
-        urls = df['url'].tolist()
-        network_crawl(urls, outpath, limit = 50)
+    #banned: Alabama Arkansas Idaho Kentucky Louisiana Mississippi Missouri Oklahoma South Dakota Tennessee Texas
+    # datafiles = ["truth_inquery/data/Georgia (GA).csv"]
+    # datafiles = ["truth_inquery/data/Hawaii (HI).csv", "truth_inquery/data/Maryland (MD).csv", "truth_inquery/data/Michigan (MI).csv", "truth_inquery/data/Montana (MT).csv", "truth_inquery/data/Nebraska (NE).csv", "truth_inquery/data/New Mexico (NM).csv"]
+    # datafiles = ["truth_inquery/data/North Carolina (NC).csv", "truth_inquery/data/North Dakota (ND).csv", "truth_inquery/data/Ohio (OH).csv", "truth_inquery/data/Oregon (OR).csv", "truth_inquery/data/Pennsylvania (PA).csv", "truth_inquery/data/Rhode Island (RI).csv"]
+    # datafiles = ["truth_inquery/data/South Carolina (SC).csv", "truth_inquery/data/Utah (UT).csv", "truth_inquery/data/Vermont (VT).csv", "truth_inquery/data/Virginia (VA).csv", "truth_inquery/data/Washington (WA).csv", "truth_inquery/data/West Virginia (WV).csv", "truth_inquery/data/Wisconsin (WI).csv" , "truth_inquery/data/Wyoming (WY).csv"]
+    datafiles = ["truth_inquery/data/Maine (ME).csv"]
+    for file in datafiles:
+        state = file[-7:]
+        state = state[:2]
 
-    # Healthcare sites
-    zips =  df['zip'].tolist()
-    # Use zips to generate base URLs
-    # call network crawl on hcp URLs
-    # hcurl = "https://www.fpachicago.com"
-    # hcinput = [hcurl]
-    # outpath = "output/hc_crawl.csv"
-    # network_crawl(hcinput, outpath, limit = 50)
+        df = csv_extract(file)
+        urls = df['url'].tolist()
+        outpath = "truth_inquery/output/" + state + "_CPC_tokens.csv"
+        print("Crawling CPCs in ", state)
+        # network_crawl(urls, outpath, limit = 50)
+
+        # Collect tokens from HCPs
+        # zips = set(df['zip'].tolist())
+        # hcp = get_hcp_base(zips, state)
+        # hcp_urls = hcp.loc['url'].to_list()
+
+        hcp = pd.read_csv("truth_inquery/data/hcp_urls_" + state + ".csv")
+        hcp_urls = hcp.iloc[0].to_list()
+        
+        baseurls = list(set(hcp_urls))
+        outpath = "truth_inquery/output/" + state + "_HCP_tokens.csv"
+        print("Crawling HCPs in", state)
+        network_crawl(baseurls, outpath, limit = 50)
+
+        print(state,"saved")
