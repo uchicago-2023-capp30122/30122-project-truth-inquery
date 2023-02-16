@@ -1,0 +1,19 @@
+,Iowa,New Mexico,Indiana,South Carolina,Arkansas,District of Columbia,California,Missouri,Pennsylvania,Idaho,Alabama,Wisconsin,Montana,Nevada,Hawaii,Georgia,Louisiana,New Hampshire,Tennessee,Arizona,Utah,Rhode Island,Michigan,Kansas,Connecticut,Alaska,North Carolina,New York,Wyoming,South Dakota,Florida,Colorado,North Dakota,Mississippi,Texas,Massachusetts,Virginia,Ohio,Oklahoma,West Virginia,Maryland,Washington,Nebraska,New Jersey,Minnesota,Illinois,Maine,Delaware,Kentucky,Vermont,Oregon
+medicaid_exception_rape_or_incest,True,,True,1.0,1.0,1.0,,1.0,1.0,1.0,1.0,True,,1.0,,True,1.0,1.0,1.0,True,True,1.0,1.0,True,,,1.0,,1.0,,1.0,1.0,1.0,True,True,,True,1.0,1.0,True,,,1.0,,,,,1.0,1.0,,
+medicaid_exception_life,True,,True,1.0,1.0,1.0,,1.0,1.0,1.0,1.0,True,,1.0,,True,1.0,1.0,1.0,True,True,1.0,1.0,True,,,1.0,,1.0,True,1.0,1.0,1.0,True,True,,True,1.0,1.0,True,,,1.0,,,,,1.0,1.0,,1.0
+exchange_coverage_no_restrictions,True,1.0,,,,1.0,True,,,,,,1.0,1.0,1.0,,,1.0,,,,1.0,,,1.0,1.0,,True,1.0,,,1.0,,,,1.0,True,,,True,1.0,1.0,,1.0,1.0,,,1.0,,1.0,1.0
+private_coverage_no_restrictions,True,1.0,,1.0,1.0,1.0,,,1.0,,1.0,True,1.0,1.0,1.0,True,1.0,1.0,1.0,True,,1.0,,,1.0,1.0,1.0,,1.0,True,1.0,1.0,,True,,1.0,True,1.0,,True,1.0,,,1.0,1.0,,,1.0,,1.0,
+medicaid_exception_fetal,Serious fetal anomaly,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,Serious fetal anomaly,,,Serious fetal anomaly,,,Serious fetal anomaly,,,,,,,,,,,
+medicaid_coverage_provider_patient_decision,,1.0,,,,,True,,,,,,1.0,,1.0,,,,,,,,,,1.0,1.0,,True,,,,,,,,1.0,,,,,1.0,1.0,,1.0,1.0,True,True,,,1.0,1.0
+medicaid_exception_health,,,Physical,,,,,,,,,Physical,,,,,,,,,Physical,,,,,,,,,,,,,,,,,,,Major Bodily Function,,,,,,,,,,,
+exchange_exception_rape_or_incest,,,True,1.0,1.0,,,,1.0,1.0,1.0,True,,,,,,,,,True,,,,,,1.0,,,,1.0,,,True,,,,1.0,,,,,,,,,,,,,
+exchange_exception_life,,,True,1.0,1.0,,,1.0,1.0,1.0,1.0,True,,,,True,,,,True,True,,1.0,True,,,1.0,,,True,1.0,,1.0,True,True,,,1.0,1.0,,,,1.0,,,,,,1.0,,
+private_exception_health,,,Major Bodily Function,,,,,,,,,,,,,,,,,,Major Bodily Function,,,,,,,,,,,,,,Major Bodily Function,,,,,,,,,,,,,,,,
+exchange_exception_health,,,Major Bodily Function,,,,,,,,,Physical,,,,Major Bodily Function,,,,Major Bodily Function,Major Bodily Function,,,,,,,,,Major Bodily Function,,,,,Major Bodily Function,,,,,,,,,,,,,,,,
+private_exception_life,,,True,,,,,1.0,,1.0,,,,,,,,,,,True,,1.0,True,,,,,,,,,1.0,,True,,,,1.0,,,,1.0,,,,,,1.0,,
+private_exception_rape_or_incest,,,True,,,,,,,,,,,,,,,,,,True,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+requires_coverage,,,,,,,True,,,,,,,,,,,,,,,,,,,,,True,,,,,,,,,,,,,,1.0,,,,True,True,,,,1.0
+Last Updated,,,,,,,2019-11-13T12:10:29.000Z,,,,,2021-05-21T22:13:01.000Z,,,,,,,,2021-05-21T22:18:09.000Z,,,,2021-05-21T22:14:13.000Z,,,,2019-11-13T12:10:25.000Z,,,,,,,,,2021-05-21T22:14:49.000Z,,,,,,,,,2019-07-02T11:35:00.000Z,2019-11-13T12:09:56.000Z,,,,
+exchange_forbids_coverage,,,,,,,,,,,,,,,,,1.0,,1.0,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+private_exception_fetal,,,,,,,,,,,,,,,,,,,,,Lethal fetal anomaly,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+exchange_exception_fetal,,,,,,,,,,,,,,,,,,,,,Lethal fetal anomaly,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
