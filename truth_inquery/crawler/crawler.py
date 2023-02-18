@@ -15,7 +15,7 @@ HCPOUT = "truth_inquery/output/state_HCP_tokens.csv"
 
 PATTERN = r'[\[0-9-()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
 
-states = {
+STATES = {
     'AK': 'Alaska', 'AL': 'Alabama', 'AR': 'Arkansas', 'AZ': 'Arizona', 'CA': 'California',
     'CO': 'Colorado', 'CT': 'Connecticut', 'DC': 'District of Columbia', 'DE': 'Delaware',
     'FL': 'Florida', 'GA': 'Georgia', 'HI': 'Hawaii', 'IA': 'Iowa', 'ID': 'Idaho',
@@ -211,12 +211,12 @@ if __name__ == "__main__":
     for state in state_inputs:
         # Crawl CPC urls
         try:
-            cpcin = CPCIN + states[state] + " (" + state + ").csv"
+            cpcin = CPCIN + STATES[state] + " (" + state + ").csv"
             cpcout = CPCOUT.replace("state", state)
         except KeyError:
             print("State file does not exist")
             continue
-        
+
         df = csv_extract(cpcin)
         urls = df['url'].tolist()
 
@@ -231,6 +231,6 @@ if __name__ == "__main__":
         hcp_urls = list(set(hcp.iloc[0].to_list()))
 
         print("Crawling HCPs in", state)
-        network_crawl(hcp_urls, HCPOUT, limit = 50)
+        network_crawl(hcp_urls, hcpout, limit = 50)
 
         print(state,"CPCs and HCPs saved")
