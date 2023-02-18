@@ -8,7 +8,27 @@ import sys
 
 s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
 
+CPCIN = "truth_inquery/data/"
+CPCOUT = "truth_inquery/output/state_CPC_tokens.csv"
+HCPIN = "truth_inquery/data/hcp_urls_state.csv"
+HCPOUT = "truth_inquery/output/state_HCP_tokens.csv"
+
 PATTERN = r'[\[0-9-()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
+
+states = {
+    'AK': 'Alaska', 'AL': 'Alabama', 'AR': 'Arkansas', 'AZ': 'Arizona', 'CA': 'California',
+    'CO': 'Colorado', 'CT': 'Connecticut', 'DC': 'District of Columbia', 'DE': 'Delaware',
+    'FL': 'Florida', 'GA': 'Georgia', 'HI': 'Hawaii', 'IA': 'Iowa', 'ID': 'Idaho',
+    'IL': 'Illinois', 'IN': 'Indiana', 'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana',
+    'MA': 'Massachusetts', 'MD': 'Maryland', 'ME': 'Maine', 'MI': 'Michigan', 'MN': 'Minnesota',
+    'MO': 'Missouri', 'MS': 'Mississippi', 'MT': 'Montana', 'NC': 'North Carolina','ND': 'North Dakota',
+    'NE': 'Nebraska', 'NH': 'New Hampshire', 'NJ': 'New Jersey', 'NM': 'New Mexico', 'NV': 'Nevada',
+    'NY': 'New York', 'OH': 'Ohio', 'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania',
+    'RI': 'Rhode Island', 'SC': 'South Carolina', 'SD': 'South Dakota', 'TN': 'Tennessee',
+    'TX': 'Texas', 'UT': 'Utah', 'VA': 'Virginia', 'VT': 'Vermont', 'WA': 'Washington', 
+    'WI': 'Wisconsin', 'WV': 'West Virginia', 'WY': 'Wyoming'
+}
+
 INDEX_IGNORE = (
     "and",
     "are",
@@ -79,7 +99,7 @@ def tokenize(root):
     
     Returns: dictionary of token-frequency key-values pairs.
     """
-    tokens = {} 
+    tokens = {}
     pattern = re.compile(PATTERN)
 
     # Spend a maximum of 5 minutes tokenizing text
@@ -97,7 +117,7 @@ def tokenize(root):
                 tokens[str_key] = 1
             else:
                 tokens[str_key] += 1
-
+        # Checks time EVERY token - not ideal?
         if time.time() > timeout:
             return tokens
 
@@ -123,8 +143,8 @@ def crawl(url, limit):
     # Tokenize the base URL (input)
     dct['base'] = tokenize(root)
     urls = set(root.xpath('//a/@href'))
-    
-    # Tokenize up to limit # sub-URLs 
+
+    # Tokenize up to limit # sub-URLs
     for u in urls:
         subroot = get_root(u)
         if subroot is not None:
@@ -178,38 +198,39 @@ def network_crawl(urllst, outpath, limit=15):
     state = state.rename({'index':'token'}, axis=1)
     state.to_csv(outpath)
     print("CSV saved")
-    return df
+    return df #optional
 
+# States that are not crawled due to abortion restrictions
+#banned: Alabama Arkansas Idaho Kentucky Louisiana Mississippi Missouri Oklahoma South Dakota Tennessee Texas West Virginia
+#stopped scheduling: North Dakota Wisconsin
+# state_inputs = glob.glob("truth_inquery/data/*).csv")
+# clinic_inputs = glob.glob("truth_inquery/data/hcp_urls*")
 if __name__ == "__main__":
-
-    #banned: Alabama Arkansas Idaho Kentucky Louisiana Mississippi Missouri Oklahoma South Dakota Tennessee Texas West Virginia
-    #stopped scheduling: North Dakota Wisconsin
-    # state_inputs = glob.glob("truth_inquery/data/*).csv")
-    state_inputs = ["truth_inquery/data/Ohio (OH).csv"]
-    for file in state_inputs:
-        state = file[-7:]
-        state = state[:2]
-        print("Crawling CPCs in", state)
-        df = csv_extract(file)
+    state_inputs = ["AK", "CA", "CO", "DC", "DE", "IA", "MD", "MI", "NC", "NE", "NH", "NJ", "NV", "OR" "PA", "UT", "VA", "WA"]
+    
+    for state in state_inputs:
+        # Crawl CPC urls
+        try:
+            cpcin = CPCIN + states[state] + " (" + state + ").csv"
+            cpcout = CPCOUT.replace("state", state)
+        except KeyError:
+            print("State file does not exist")
+            continue
+        
+        df = csv_extract(cpcin)
         urls = df['url'].tolist()
-        outpath = "truth_inquery/output/" + state + "_CPC_tokens.csv"
-        
-        network_crawl(urls, outpath, limit = 50)
 
-    # Collect tokens from HCPs
-    states = ["MI", "MN", "OH"]
-    base = "truth_inquery/data/hcp_urls_"
-    # clinic_inputs = glob.glob("truth_inquery/data/hcp_urls*")
-    # for file in clinic_inputs:
-    for state in states:
-        file = base + state + ".csv"
-        # state = file[-6:-4]
+        print("Crawling CPCs in", state)
+        network_crawl(urls, cpcout, limit = 50)
+
+        # Crawl HCP urls
+        hcpin = HCPIN.replace("state", state)
+        hcpout = HCPOUT.replace("state", state)
+
+        hcp = pd.read_csv(hcpin)
+        hcp_urls = list(set(hcp.iloc[0].to_list()))
+
         print("Crawling HCPs in", state)
-        hcp = pd.read_csv(file)
-        hcp_urls = hcp.iloc[0].to_list()
-        
-        baseurls = list(set(hcp_urls))
-        outpath = "truth_inquery/output/" + state + "_HCP_tokens.csv"
-        network_crawl(baseurls, outpath, limit = 50)
+        network_crawl(hcp_urls, HCPOUT, limit = 50)
 
-    print(state,"CPCs saved")
+        print(state,"CPCs and HCPs saved")
