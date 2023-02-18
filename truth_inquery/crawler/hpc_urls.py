@@ -113,7 +113,7 @@ def get_HPC_base(zips, state):
 if __name__ == "__main__":
     # state_inputs = glob.glob("truth_inquery/data/*).csv")
 
-    for state in STATES:
+    for state in STATES.keys():
         HPCinput = HPCIN.replace("state", state)
         # Collect HPC URLs
         df = csv_extract(HPCinput)
