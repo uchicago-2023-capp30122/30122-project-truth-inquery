@@ -8,15 +8,15 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException
 import glob
-from crawler import csv_extract
+from crawler import csv_extract, HPCIN, STATES
 
 WAIT = 5
 START = "https://www.abortionfinder.org"
 
-def get_hcp_base(zips, state):
+def get_HPC_base(zips, state):
     """
     Navigates web browser to an abortion finder search and
-    enters each CPC zip code to search for nearby abortion healthcare providers (HCPs).
+    enters each CPC zip code to search for nearby abortion healthcare providers (HPCs).
 
     When available, the crawler collects distance, address, and url (base URL) for the
     top search result (ordered by distance in miles, alphabetical otherwise).
@@ -29,28 +29,28 @@ def get_hcp_base(zips, state):
     Returns:
     df (dataframe) containing data for each inital search result URL (base URL) (str) with
         - List of sub-URLS for each base (list of lists)
-        - Distance between CPC zip and HCP (str)
-        - Address of HCP (str)
+        - Distance between CPC zip and HPC (str)
+        - Address of HPC (str)
     """
     # Create webdriver client for Chrome
     driver = webdriver.Chrome()
     actions = ActionChains(driver)
-    hcp_data = {}
+    HPC_data = {}
     k = 1
 
     # Loop through CPC zip codes
-    for zip in zips:
+    for z in zips:
         base = {}
         driver.get(START)
 
         # Enter zip code
-        driver.find_element(By.XPATH, '//*[@id="location-box"]').send_keys(zip)
+        driver.find_element(By.XPATH, '//*[@id="location-box"]').send_keys(z)
 
         # Tab checkbox and fill
         for _ in range(3):
             actions.send_keys(Keys.TAB)
             actions.perform()
-            
+
         actions.send_keys(Keys.RETURN)
         actions.perform()
 
@@ -80,7 +80,7 @@ def get_hcp_base(zips, state):
             # First result
             driver.find_element(By.XPATH, '//div[@class="pill-link-container"]').click()
             time.sleep(WAIT)
-            # Try to collect HCP website "Visit Website"
+            # Try to collect HPC website "Visit Website"
             ele = driver.find_element(By.XPATH, '//a[@class="clinic-link"]')
             base_url = ele.get_attribute("href")
             if not base_url:
@@ -100,25 +100,22 @@ def get_hcp_base(zips, state):
         base['url'] = base_url
         base['distance'] = distance
         base['address'] = address
-        hcp_data[k] = base
+        HPC_data[k] = base
         k += 1
-        print(k)
 
     # Dictionary of dictionaries to DF
     driver.quit()
-    df =  pd.DataFrame(hcp_data)
-    out = "truth_inquery/data/hcp_urls_" + state + ".csv"
-    df.to_csv(out)
-    return df
+    df =  pd.DataFrame(HPC_data)
+    df.to_csv(HPCIN.replace("state", state))
+    return df #optional
 
 # Collect URLs for all states with CPC data (where abortion legal)
 if __name__ == "__main__":
-    state_inputs = glob.glob("truth_inquery/data/*).csv")
+    # state_inputs = glob.glob("truth_inquery/data/*).csv")
 
-    for file in state_inputs:
-        state = file[-7:]
-        state = state[:2]
-        # Collect HCP URLs
-        df = csv_extract(file)
+    for state in STATES:
+        HPCinput = HPCIN.replace("state", state)
+        # Collect HPC URLs
+        df = csv_extract(HPCinput)
         zips = set(df['zip'].tolist())
-        hcp = get_hcp_base(zips, state)
+        get_HPC_base(zips, state)

@@ -10,8 +10,8 @@ s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
 
 CPCIN = "truth_inquery/data/"
 CPCOUT = "truth_inquery/output/state_CPC_tokens.csv"
-HCPIN = "truth_inquery/data/hcp_urls_state.csv"
-HCPOUT = "truth_inquery/output/state_HCP_tokens.csv"
+HPCIN = "truth_inquery/data/HPC_urls_state.csv"
+HPCOUT = "truth_inquery/output/state_HPC_tokens.csv"
 
 PATTERN = r'[\[0-9-()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
 
@@ -204,33 +204,33 @@ def network_crawl(urllst, outpath, limit=15):
 #banned: Alabama Arkansas Idaho Kentucky Louisiana Mississippi Missouri Oklahoma South Dakota Tennessee Texas West Virginia
 #stopped scheduling: North Dakota Wisconsin
 # state_inputs = glob.glob("truth_inquery/data/*).csv")
-# clinic_inputs = glob.glob("truth_inquery/data/hcp_urls*")
+# clinic_inputs = glob.glob("truth_inquery/data/HPC_urls*")
 if __name__ == "__main__":
     state_inputs = ["AK", "CA", "CO", "DC", "DE", "IA", "MD", "MI", "NC", "NE", "NH", "NJ", "NV", "OR" "PA", "UT", "VA", "WA"]
-    
+
     for state in state_inputs:
         # Crawl CPC urls
         try:
-            cpcin = CPCIN + STATES[state] + " (" + state + ").csv"
-            cpcout = CPCOUT.replace("state", state)
+            CPCinput = CPCIN + STATES[state] + " (" + state + ").csv"
+            CPCoutput = CPCOUT.replace("state", state)
         except KeyError:
             print("State file does not exist")
             continue
 
-        df = csv_extract(cpcin)
+        df = csv_extract(CPCinput)
         urls = df['url'].tolist()
 
         print("Crawling CPCs in", state)
-        network_crawl(urls, cpcout, limit = 50)
+        network_crawl(urls, CPCoutput, limit = 50)
 
-        # Crawl HCP urls
-        hcpin = HCPIN.replace("state", state)
-        hcpout = HCPOUT.replace("state", state)
+        # Crawl HPC urls
+        HPCinput = HPCIN.replace("state", state)
+        HPCoutput = HPCOUT.replace("state", state)
 
-        hcp = pd.read_csv(hcpin)
-        hcp_urls = list(set(hcp.iloc[0].to_list()))
+        HPC = pd.read_csv(HPCinput)
+        HPC_urls = list(set(HPC.iloc[0].to_list()))
 
-        print("Crawling HCPs in", state)
-        network_crawl(hcp_urls, hcpout, limit = 50)
+        print("Crawling HPCs in", state)
+        network_crawl(HPC_urls, HPCoutput, limit = 50)
 
-        print(state,"CPCs and HCPs saved")
+        print(state,"CPCs and HPCs saved")
