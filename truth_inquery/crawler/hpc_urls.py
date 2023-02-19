@@ -1,5 +1,4 @@
-# Collect healthcare provider base URLs using CPC zip codes
-# Input: CPC zip codes, Output: list of healthcare urls to crawl
+# Collect healthcare provider clinic (HPC) URLs using CPC datasets
 import time
 import pandas as pd
 from selenium import webdriver
@@ -7,8 +6,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException
-import glob
-from crawler import csv_extract, HPCIN, STATES
+from crawler import csv_extract, CPCIN, HPCIN, STATES
 
 WAIT = 5
 START = "https://www.abortionfinder.org"
@@ -111,11 +109,14 @@ def get_HPC_base(zips, state):
 
 # Collect URLs for all states with CPC data (where abortion legal)
 if __name__ == "__main__":
-    # state_inputs = glob.glob("truth_inquery/data/*).csv")
 
-    for state in STATES.keys():
-        HPCinput = HPCIN.replace("state", state)
-        # Collect HPC URLs
-        df = csv_extract(HPCinput)
+    for state, name in STATES.items():
+        HPCinput = CPCIN + name + " (" + state + ").csv"
+        try:
+            df = csv_extract(HPCinput)
+        except FileNotFoundError:
+            print(state, "file not in data set, skipping")
+            continue
+
         zips = set(df['zip'].tolist())
         get_HPC_base(zips, state)

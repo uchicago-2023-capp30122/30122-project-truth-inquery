@@ -3,8 +3,6 @@ import pandas as pd
 import re
 import scrapelib
 import time
-import glob
-import sys
 
 s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
 
@@ -13,7 +11,7 @@ CPCOUT = "truth_inquery/output/state_CPC_tokens.csv"
 HPCIN = "truth_inquery/data/HPC_urls_state.csv"
 HPCOUT = "truth_inquery/output/state_HPC_tokens.csv"
 
-PATTERN = r'[\[0-9-()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
+PATTERN = r'[\[0-9()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
 
 STATES = {
     'AK': 'Alaska', 'AL': 'Alabama', 'AR': 'Arkansas', 'AZ': 'Arizona', 'CA': 'California',
@@ -61,18 +59,18 @@ def csv_extract(input_file):
 
     Inputs:
         input_file (str): File path to .csv file
-    
+
     Returns: list of URLs
     """
     f = pd.read_csv(input_file)
     df = f[f['Website'].notna()]
     df = df[['Website','Zip Code']]
-    
+
     df = df.rename(columns={'Website':'url','Zip Code':'zip'})
     df['zip'] = df['zip'].astype(str)
     df['zip'] = df['zip'].str.zfill(5)
     return df
-    
+
 def get_root(url):
     """
     Extracts html root from url if possible
@@ -156,7 +154,7 @@ def crawl(url, limit):
 
     return pd.DataFrame(dct)
 
-def network_crawl(urllst, outpath, limit=15):
+def network_crawl(urllst, outpath, limit=50):
     """
     Takes in URL list as list of base urls and crawls up to 
     the limit # of adjacent URLs (one click away)
@@ -193,44 +191,42 @@ def network_crawl(urllst, outpath, limit=15):
     clinic.to_csv(outpath.replace("_tokens","_clinics"))
 
     # Row-wise sum, one column of token counts by state
-    state = clean_df(df)
-    state = state.reset_index()
-    state = state.rename({'index':'token'}, axis=1)
-    state.to_csv(outpath)
+    # state = clean_df(df)
+    # state = state.reset_index()
+    # state = state.rename({'index':'token'}, axis=1)
+    # state.to_csv(outpath)
     print("CSV saved")
-    return df #optional
+    return clinic #optional
 
 # States that are not crawled due to abortion restrictions
-#banned: Alabama Arkansas Idaho Kentucky Louisiana Mississippi Missouri Oklahoma South Dakota Tennessee Texas West Virginia
-#stopped scheduling: North Dakota Wisconsin
-# state_inputs = glob.glob("truth_inquery/data/*).csv")
-# clinic_inputs = glob.glob("truth_inquery/data/HPC_urls*")
+# banned: Alabama Arkansas Idaho Kentucky Louisiana Mississippi Missouri 
+#         Oklahoma South Dakota Tennessee Texas West Virginia
+# stopped scheduling: North Dakota Wisconsin
 if __name__ == "__main__":
-    state_inputs = ["AK", "CA", "CO", "DC", "DE", "IA", "MD", "MI", "NC", "NE", "NH", "NJ", "NV", "OR" "PA", "UT", "VA", "WA"]
 
-    for state in state_inputs:
+    for stabb, name in STATES.items():
         # Crawl CPC urls
         try:
-            CPCinput = CPCIN + STATES[state] + " (" + state + ").csv"
-            CPCoutput = CPCOUT.replace("state", state)
+            CPCinput = CPCIN + name + " (" + stabb + ").csv"
+            CPCoutput = CPCOUT.replace("state", stabb)
         except KeyError:
-            print("State file does not exist")
+            print(stabb, "file does not exist")
             continue
 
         df = csv_extract(CPCinput)
         urls = df['url'].tolist()
 
-        print("Crawling CPCs in", state)
-        network_crawl(urls, CPCoutput, limit = 50)
+        print("Crawling CPCs in", stabb)
+        network_crawl(urls, CPCoutput, limit=50)
 
         # Crawl HPC urls
-        HPCinput = HPCIN.replace("state", state)
-        HPCoutput = HPCOUT.replace("state", state)
+        HPCinput = HPCIN.replace("state", stabb)
+        HPCoutput = HPCOUT.replace("state", stabb)
 
         HPC = pd.read_csv(HPCinput)
         HPC_urls = list(set(HPC.iloc[0].to_list()))
 
-        print("Crawling HPCs in", state)
-        network_crawl(HPC_urls, HPCoutput, limit = 50)
+        print("Crawling HPCs in", stabb)
+        network_crawl(HPC_urls, HPCoutput, limit=50)
 
-        print(state,"CPCs and HPCs saved")
+        print(stabb,"CPCs and HPCs saved")
