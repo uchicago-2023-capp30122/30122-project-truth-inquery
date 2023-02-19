@@ -1,16 +1,24 @@
 import glob
 import pandas as pd
-# import sqlite3
+import sqlite3
 
-path1 = "./database_model/API_data"
-path2 = "./truth_inquery/output" 
-path3 = "./truth_inquery/data"
+path1 = "../database_model/API_data"
+path2 = "../truth_inquery/output" 
+path3 = "../truth_inquery/data"
+
+files = glob.glob(path2 + "/*.csv")
+conn = sqlite3.connect("token_states.db") 
+for file_name in files:
+    table_name = file_name.split('/')[-1]
+    df = pd.read_csv(file_name)
+    df.to_sql(table_name, conn, if_exists='append', index=False)
+conn.close()
 
 def concat_files(path, index): #helper
     """
     """
     files = glob.glob(path + "/*.csv")
-    # dataframe = pd.DataFrame()
+    dataframe = pd.DataFrame()
     content = []
     for filename in files:
         df = pd.read_csv(filename, index_col = index)
@@ -20,51 +28,13 @@ def concat_files(path, index): #helper
 
 clinics = concat_files(path3, 3)
 API_data = concat_files(path1, 0)
-API_data
 
-# files = glob.glob(path2 + "/*.csv")
-# files
-# conn = sqlite3.connect("token_states.db") 
-# for file_name in files:
-#     table_name = file_name.split('.')[0]
-#     df = pd.read_csv(file_name)
-#     df.to_sql(table_name, conn, if_exists='append', index=False)
-# conn.close()
+conn1 = sqlite3.connect("api.db")
+API_data.to_sql(name="API", con = conn1)
+conn.close()
+
+conn2 = sqlite3.connect("clinics.db")
+clinics.to_sql(name="clinics", con = conn2)
+conn.close()
 
 
-
-
-# # connection = sqlite3.connect("AlabamaTokens.db")
-# # df.to_sql("token_AL", connection, if_exists = "replace")
-# # connection.close()
-
-
-# file_names = ["/API\ data/",
-#                 "/Users/dematherese/capp30122/30122-project-truth-inquery/project/output/Alabama tokens.csv",
-#                 "/Users/dematherese/capp30122/30122-project-truth-inquery/project/output/Colorado tokens.csv",
-#                 "/Users/dematherese/capp30122/database_model/API data/insurance_coverage_table.csv",
-#                 "/Users/dematherese/capp30122/database_model/API data/gestational_limits_table.csv"]
-# conn = sqlite3.connect("token_states.db") 
-# for file_name in file_names:
-#     table_name = file_name.split('.')[0]
-#     df = pd.read_csv(file_name)
-#     df.to_sql(table_name, conn, if_exists='append', index=False)
-# conn.close()
-
-
-
-
-# # with open("/Users/dematherese/capp30122/30122-project-truth-inquery/project/output/Alabama tokens.csv") as f:
-# #     d = csv.DictReader(f)
-# #     s = [(i[""], i["Total"]) for i in d]
-# #     print(s)
-
-# # sqliteConnection = sqlite3.connect('sql.db')
-# # cursor = sqliteConnection.cursor()
-
-# # cursor.execute('create table token(name varchar2(10), Total float);')
-# # cursor.executemany(
-# #         "insert into token("", Total) VALUES (?, ?);",)
-# # cursor.execute('select * from token;')
-# # result = cursor.fetchall()
-# # print(result)
