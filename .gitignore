@@ -1,0 +1,6 @@
+*.pyc
+*.xlsx
+.DS_Store
+.pytest_cache
+.vscode
+.venv
