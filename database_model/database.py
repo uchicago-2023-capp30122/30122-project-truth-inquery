@@ -29,7 +29,7 @@ def concat_files(path, index): #helper
 def concat_files1(path, index): #helper
     """
     """
-    files = glob.glob(path + "/*CPC_clinics.csv") 
+    files = glob.glob(path + "/CPC_.*\.csv") 
     dataframe = pd.DataFrame()
     content = []
     for filename in files:
@@ -41,7 +41,7 @@ def concat_files1(path, index): #helper
 def concat_files2(path, index): #helper
     """
     """
-    files = glob.glob(path + "/*HPC_clinics.csv") 
+    files = glob.glob(path + "/HPC_.*\.csv") 
     dataframe = pd.DataFrame()
     content = []
     for filename in files:
@@ -59,7 +59,7 @@ API_data.to_sql(name="API", con = conn1)
 conn.close()
 
 conn2 = sqlite3.connect("CPC_clinics.db")
-cpc_linics.to_sql(name="CPC_clinics", con = conn2)
+cpc_clinics.to_sql(name="CPC_clinics", con = conn2)
 conn.close()
 
 conn3 = sqlite3.connect("HPC_clinics.db")
