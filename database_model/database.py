@@ -8,6 +8,19 @@ path1 = "../database_model"
 path2 = "../truth_inquery/output" 
 path3 = "../truth_inquery/data"
 
+# filesCPC = []
+# for fname in os.listdir(path=path3):
+#     if re.match("CPC_.*\.csv", fname):
+#         filesCPC.append(path3 + "/" + fname)
+# print(files)
+
+# filesHPC = []
+# for fname in os.listdir(path=path3):
+#     if re.match("HPC_.*\.csv", fname):
+#         filesHPC.append(path3 + "/" + fname)
+# print(filesHPC)
+
+
 files = glob.glob(path3 + "/*.csv")
 conn = sqlite3.connect("token_states.db") 
 for file_name in files:
@@ -31,13 +44,13 @@ def concat_files(path, index): #helper
 def concat_files1(): #helper
     """
     """
-    files = []
+    filesCPC = []
     for fname in os.listdir(path=path3):
         if re.match("CPC_.*\.csv", fname):
-         files.append(fname)
+            filesCPC.append(path3 + "/" + fname)
     dataframe = pd.DataFrame()
     content = []
-    for filename in files:
+    for filename in filesCPC:
         df = pd.read_csv(filename, index_col = 3)
         content.append(df)
     data_frame = pd.concat(content)
@@ -46,14 +59,14 @@ def concat_files1(): #helper
 def concat_files2(): #helper
     """
     """
-    files = []
+    filesHPC = []
     for fname in os.listdir(path=path3):
         if re.match("HPC_.*\.csv", fname):
-         files.append(fname)
+            filesHPC.append(path3 + "/" + fname)
     # files = glob.glob(path + re.match("/HPC_.*\.csv"))
     dataframe = pd.DataFrame()
     content = []
-    for filename in files:
+    for filename in filesHPC:
         df = pd.read_csv(filename, index_col = index)
         content.append(df)
     data_frame = pd.concat(content)
