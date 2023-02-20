@@ -2,7 +2,7 @@ import glob
 import pandas as pd
 import sqlite3
 
-path1 = "../database_model/API_data"
+path1 = "../database_model"
 path2 = "../truth_inquery/output" 
 path3 = "../truth_inquery/data"
 
