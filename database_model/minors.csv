@@ -1,0 +1,8 @@
+,Kentucky,Nevada,Alaska,New Hampshire,Nebraska,Wisconsin,Mississippi,Maine,Minnesota,New York,Ohio,Georgia,Louisiana,Alabama,Wyoming,Oregon,California,New Jersey,Massachusetts,North Dakota,Delaware,Iowa,South Dakota,Maryland,Connecticut,Pennsylvania,Colorado,District of Columbia,Michigan,Vermont,Arizona,Illinois,Indiana,West Virginia,Tennessee,New Mexico,North Carolina,Texas,Oklahoma,Montana,Hawaii,Florida,Arkansas,Missouri,Virginia,Rhode Island,Washington,Utah,Idaho,Kansas,South Carolina
+parental_consent_required,1.0,,,,1.0,1.0,1.0,,,,1.0,,1.0,1.0,1.0,,,,True,1.0,,,,,,1.0,,,1.0,,1.0,,1.0,,1.0,,1.0,1.0,1.0,,,True,1.0,1.0,1.0,1.0,,1.0,1.0,1.0,1.0
+judicial_bypass_available,1.0,,,1.0,1.0,1.0,1.0,,,,1.0,1.0,1.0,1.0,1.0,,,,True,1.0,1.0,1.0,1.0,,,1.0,1.0,,1.0,,1.0,,1.0,1.0,1.0,,1.0,1.0,1.0,True,,True,1.0,1.0,1.0,1.0,,1.0,1.0,1.0,1.0
+below_age,18.0,,,18.0,18.0,18.0,18.0,,,,18.0,18.0,18.0,18.0,18.0,,,,16,18.0,16.0,18.0,18.0,18.0,,18.0,18.0,,18.0,,18.0,,18.0,18.0,18.0,,18.0,18.0,18.0,18,,18,18.0,18.0,18.0,18.0,,18.0,18.0,18.0,17.0
+parents_required,1.0,,,1.0,1.0,1.0,2.0,,,,1.0,1.0,1.0,1.0,1.0,,,,1,2.0,1.0,1.0,1.0,1.0,,1.0,1.0,,1.0,,1.0,,1.0,1.0,1.0,,1.0,1.0,1.0,1,,1,1.0,1.0,1.0,1.0,,1.0,1.0,2.0,1.0
+allows_minor_to_consent_to_abortion,,1.0,1.0,,,,,1.0,True,1.0,,,,,,1.0,1.0,1.0,,,,,,,1.0,,,1.0,,1.0,,True,,,,1.0,,,,,1.0,,,,,,1.0,,,,
+parental_notification_required,,,,1.0,,,,,,,,1.0,,,1.0,,,,,,1.0,1.0,1.0,1.0,,,1.0,,,,,,,1.0,,,,1.0,1.0,True,,,,,1.0,,,1.0,,,
+Last Updated,,,,,,,,,2022-08-23T13:46:39.000Z,,,,,,,,,,2022-06-30T09:54:47.000Z,,,,,,,,,,,,,2022-08-23T13:38:09.000Z,,,,,,,,2022-02-11T15:51:59.000Z,,2022-08-23T13:40:32.000Z,,,,,,,,,

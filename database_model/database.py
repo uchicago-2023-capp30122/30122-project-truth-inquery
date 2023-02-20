@@ -1,4 +1,6 @@
 import glob
+import re
+import os
 import pandas as pd
 import sqlite3
 
@@ -26,10 +28,29 @@ def concat_files(path, index): #helper
     data_frame = pd.concat(content)
     return data_frame
 
-def concat_files1(path, index): #helper
+def concat_files1(): #helper
     """
     """
-    files = glob.glob(path + "/CPC_.*\.csv") 
+    files = []
+    for fname in os.listdir(path=path3):
+        if re.match("CPC_.*\.csv", fname):
+         files.append(fname)
+    dataframe = pd.DataFrame()
+    content = []
+    for filename in files:
+        df = pd.read_csv(filename, index_col = 3)
+        content.append(df)
+    data_frame = pd.concat(content)
+    return data_frame
+
+def concat_files2(): #helper
+    """
+    """
+    files = []
+    for fname in os.listdir(path=path3):
+        if re.match("HPC_.*\.csv", fname):
+         files.append(fname)
+    # files = glob.glob(path + re.match("/HPC_.*\.csv"))
     dataframe = pd.DataFrame()
     content = []
     for filename in files:
@@ -38,20 +59,8 @@ def concat_files1(path, index): #helper
     data_frame = pd.concat(content)
     return data_frame
 
-def concat_files2(path, index): #helper
-    """
-    """
-    files = glob.glob(path + "/HPC_.*\.csv") 
-    dataframe = pd.DataFrame()
-    content = []
-    for filename in files:
-        df = pd.read_csv(filename, index_col = index)
-        content.append(df)
-    data_frame = pd.concat(content)
-    return data_frame
-
-cpc_clinics = concat_files1(path2, 3)
-hpc_clinics = concat_files2(path2, 3)
+cpc_clinics = concat_files1()
+hpc_clinics = concat_files2()
 API_data = concat_files(path1, 0)
 
 conn1 = sqlite3.connect("api.db")
