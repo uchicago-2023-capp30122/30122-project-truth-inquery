@@ -8,19 +8,6 @@ path1 = "../database_model"
 path2 = "../truth_inquery/output" 
 path3 = "../truth_inquery/data"
 
-# filesCPC = []
-# for fname in os.listdir(path=path3):
-#     if re.match("CPC_.*\.csv", fname):
-#         filesCPC.append(path3 + "/" + fname)
-# print(files)
-
-# filesHPC = []
-# for fname in os.listdir(path=path3):
-#     if re.match("HPC_.*\.csv", fname):
-#         filesHPC.append(path3 + "/" + fname)
-# print(filesHPC)
-
-
 files = glob.glob(path3 + "/*.csv")
 conn = sqlite3.connect("token_states.db") 
 for file_name in files:
@@ -63,11 +50,10 @@ def concat_files2(): #helper
     for fname in os.listdir(path=path3):
         if re.match("HPC_.*\.csv", fname):
             filesHPC.append(path3 + "/" + fname)
-    # files = glob.glob(path + re.match("/HPC_.*\.csv"))
     dataframe = pd.DataFrame()
     content = []
     for filename in filesHPC:
-        df = pd.read_csv(filename, index_col = index)
+        df = pd.read_csv(filename)
         content.append(df)
     data_frame = pd.concat(content)
     return data_frame
@@ -85,7 +71,7 @@ cpc_clinics.to_sql(name="CPC_clinics", con = conn2)
 conn.close()
 
 conn3 = sqlite3.connect("HPC_clinics.db")
-cpc_linics.to_sql(name="HPC_clinics", con = conn2)
+hpc_clinics.to_sql(name="HPC_clinics", con = conn3)
 conn.close()
 
 
