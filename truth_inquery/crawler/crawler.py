@@ -6,13 +6,14 @@ import time
 
 s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
 
-CPCIN = "truth_inquery/data/"
+CPCIN = "truth_inquery/data/CPC_"
 CPCOUT = "truth_inquery/output/state_CPC_tokens.csv"
 HPCIN = "truth_inquery/data/HPC_urls_state.csv"
 HPCOUT = "truth_inquery/output/state_HPC_tokens.csv"
 
 PATTERN = r'[\[0-9()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
 
+# source: https://gist.github.com/rogerallen/1583593
 STATES = {
     'AK': 'Alaska', 'AL': 'Alabama', 'AR': 'Arkansas', 'AZ': 'Arizona', 'CA': 'California',
     'CO': 'Colorado', 'CT': 'Connecticut', 'DC': 'District of Columbia', 'DE': 'Delaware',
@@ -189,14 +190,8 @@ def network_crawl(urllst, outpath, limit=50):
     clinic = df.reset_index()
     clinic = clinic.rename({'index':'token','Total':'Total0'}, axis=1)
     clinic.to_csv(outpath.replace("_tokens","_clinics"))
-
-    # Row-wise sum, one column of token counts by state
-    # state = clean_df(df)
-    # state = state.reset_index()
-    # state = state.rename({'index':'token'}, axis=1)
-    # state.to_csv(outpath)
+    
     print("CSV saved")
-    return clinic #optional
 
 # States that are not crawled due to abortion restrictions
 # banned: Alabama Arkansas Idaho Kentucky Louisiana Mississippi Missouri 
