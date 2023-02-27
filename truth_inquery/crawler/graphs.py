@@ -144,9 +144,11 @@ if __name__ == "__main__":
     pos = nx.spring_layout(G)
 
     # Add options using clinic as key
+    plt.title(STATES[state]+" "+clinic+"s")
     nx.draw(G, pos, **OPTIONAL[clinic])
     nx.draw_networkx_labels(G, pos, nx.get_node_attributes(G, 'label'), \
                                     verticalalignment='baseline')
     nx.draw_networkx_edge_labels(G,pos,edge_labels=nx.get_edge_attributes(G,'label'))
+    
     plt.savefig(filename)
-    # plt.show()
+    plt.show()
