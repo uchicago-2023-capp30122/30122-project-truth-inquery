@@ -70,12 +70,12 @@ def initialize_graph(state, clinic):
 
     # Load in data
     try:
-        df = pd.read_csv(csv, dtype={0:int, 1:str})
+        df = pd.read_csv(csv)
 
     except FileNotFoundError:
         print("No data on", state, "due to abortion ban or lack of data.")
         sys.exit(1)
-    
+
     # Initialize graph
     G = nx.Graph()
     G.add_node(state)
@@ -91,7 +91,7 @@ def clinic_graph(state, num_edges, clinic):
         - state: (str) state abbrevation
         - num_edges: (int) number of tokens to include in graph
         - clinic: (str) CPC or HPC
-    
+
     Returns graph object with labeled nodes and edges
     """
     G, df = initialize_graph(state, clinic)
@@ -144,11 +144,11 @@ if __name__ == "__main__":
     pos = nx.spring_layout(G)
 
     # Add options using clinic as key
-    plt.title(STATES[state]+" "+clinic+"s")
+    plt.title(STATES[state]+" "+clinic)
     nx.draw(G, pos, **OPTIONAL[clinic])
     nx.draw_networkx_labels(G, pos, nx.get_node_attributes(G, 'label'), \
                                     verticalalignment='bottom')
     nx.draw_networkx_edge_labels(G,pos,edge_labels=nx.get_edge_attributes(G,'label'))
-    
+
     plt.savefig(filename)
     plt.show()
