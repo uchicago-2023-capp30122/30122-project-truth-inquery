@@ -3,7 +3,7 @@ import json
 import pandas as pd
 from urllib.parse import urlparse
 
-apikey = '###########'
+apikey = '#########'
 
 def make_link_absolute(rel_url, current_url):
     """
@@ -26,6 +26,8 @@ def make_link_absolute(rel_url, current_url):
 
 def list_urls():
     """
+    Returns a list of full URLs/queries of different data tables from 
+    https://www.abortionpolicyapi.com to run the function "api_calls()".
     """
     relative_urls = ["/v1/gestational_limits/states/", 
                     "/v1/insurance_coverage/states/", 
@@ -41,6 +43,10 @@ def list_urls():
 
 def api_calls():
     """
+    A function to perform the GET requests to the specified urls in the list 
+    generated from "list_urls()".
+    Returns:
+        A list of json file names of the respective GET requests. 
     """
     urls = list_urls()
     headers = { 'token': apikey }
@@ -57,6 +63,10 @@ def api_calls():
 
 def convert_json_csv():
     """
+    Calls the api_calls function to generate a list of json file names and 
+    converts the json files to csv format.
+    Returns:
+        A csv file for each json file and stored in the current directory.
     """
     files = api_calls()
     for file in files:
