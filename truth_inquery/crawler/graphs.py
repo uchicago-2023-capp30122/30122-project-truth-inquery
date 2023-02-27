@@ -10,12 +10,12 @@ from crawler import CPCIN, CPCOUT, HPCIN, HPCOUT, STATES
 random.seed(1234)
 OPTIONAL = {
     'CPC':{'node_color': 'red',
-           'alpha': 0.7,
-           'node_size': 300,
+           'alpha': 0.8,
+           'node_size': 150,
            'width': 1},
     'HPC':{'node_color': 'blue',
-           'alpha': 0.7,
-           'node_size': 300,
+           'alpha': 0.8,
+           'node_size': 150,
            'width': 1}
     }
 
@@ -78,7 +78,7 @@ def initialize_graph(state, clinic):
     
     # Initialize graph
     G = nx.Graph()
-    G.add_node(state, label=state)
+    G.add_node(state)
 
     return G, df
 
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     plt.title(STATES[state]+" "+clinic+"s")
     nx.draw(G, pos, **OPTIONAL[clinic])
     nx.draw_networkx_labels(G, pos, nx.get_node_attributes(G, 'label'), \
-                                    verticalalignment='baseline')
+                                    verticalalignment='bottom')
     nx.draw_networkx_edge_labels(G,pos,edge_labels=nx.get_edge_attributes(G,'label'))
     
     plt.savefig(filename)
