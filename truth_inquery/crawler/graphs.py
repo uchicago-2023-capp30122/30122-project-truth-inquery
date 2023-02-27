@@ -1,3 +1,4 @@
+# Aaron Haefner
 import pandas as pd
 import networkx as nx
 import os
@@ -38,7 +39,7 @@ def top_clinic_tokens(df, col, top_num):
     Cleans token-count pandas dataframe for single URL (clinic)
 
     Inputs
-        - df: (pd dataframe) dataframe as token-count columns
+        - df: (pd dataframe) dataframe as token-count columns (2)
         - col (string): column with token counts of URL
         - top_num (int): number of top tokens to return
 
