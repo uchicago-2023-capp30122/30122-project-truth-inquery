@@ -7,9 +7,9 @@ import time
 s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
 
 CPCIN = "truth_inquery/data/CPC_"
-CPCOUT = "truth_inquery/output/state_CPC_tokens.csv"
+CPCOUT = "truth_inquery/output/state_CPC_clinics.csv"
 HPCIN = "truth_inquery/data/HPC_urls_state.csv"
-HPCOUT = "truth_inquery/output/state_HPC_tokens.csv"
+HPCOUT = "truth_inquery/output/state_HPC_clinics.csv"
 
 PATTERN = r'[\[0-9()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
 

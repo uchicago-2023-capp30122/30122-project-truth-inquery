@@ -10,6 +10,7 @@ We use data from the advocacy organization ([Expose Fake Clincs](https://www.exp
 
 2. We collect and clean data in the same way using networks of URLs of real healthcare clinics providing reproductive and contraceptive care which come from ([Abortion Finder](https://www.abortionfinder.org/)). 
 
-### Data Cleaning
-1. Tokens are collected and counted if they do not contain characters matching `r'\W+'`.
-2. Tokens are aggregated by state and saved in CSV files.
+We identify legitimate and nearby healthcare providers by searching the 
+site using the provided CPC zip code. 
+
+### Data visualization
