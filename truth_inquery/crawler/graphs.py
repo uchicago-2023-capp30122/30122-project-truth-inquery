@@ -10,12 +10,12 @@ from crawler import CPCIN, CPCOUT, HPCIN, HPCOUT, STATES
 random.seed(1234)
 OPTIONAL = {
     'CPC':{'node_color': 'red',
-           'alpha': 0.8,
-           'node_size': 150,
+           'alpha': 0.6,
+           'node_size': 600,
            'width': 1},
     'HPC':{'node_color': 'blue',
-           'alpha': 0.8,
-           'node_size': 150,
+           'alpha': 0.6,
+           'node_size': 600,
            'width': 1}
     }
 
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     plt.title(STATES[state]+" "+clinic)
     nx.draw(G, pos, **OPTIONAL[clinic])
     nx.draw_networkx_labels(G, pos, nx.get_node_attributes(G, 'label'), \
-                                    verticalalignment='bottom')
+                                    verticalalignment='center')
     nx.draw_networkx_edge_labels(G,pos,edge_labels=nx.get_edge_attributes(G,'label'))
 
     plt.savefig(filename)
