@@ -4,13 +4,16 @@ import pandas as pd
 import re
 import scrapelib
 import time
+from collections import defaultdict
 
 s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
 
+
+LIMIT = 25
 CPCIN = "truth_inquery/data/CPC_"
-CPCOUT = "truth_inquery/output/state_CPC_clinics.csv"
+CPCOUT = "truth_inquery/temp/CPC_state_clinics.csv"
 HPCIN = "truth_inquery/data/HPC_urls_state.csv"
-HPCOUT = "truth_inquery/output/state_HPC_clinics.csv"
+HPCOUT = "truth_inquery/temp/HPC_state_clinics.csv"
 
 PATTERN = r'[\[0-9()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
 
@@ -24,6 +27,12 @@ STATES = {
     'MO': 'Missouri', 'MS': 'Mississippi', 'MT': 'Montana', 'NC': 'North Carolina','ND': 'North Dakota',
     'NE': 'Nebraska', 'NH': 'New Hampshire', 'NJ': 'New Jersey', 'NM': 'New Mexico', 'NV': 'Nevada',
     'NY': 'New York', 'OH': 'Ohio', 'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania',
+    'RI': 'Rhode Island', 'SC': 'South Carolina', 'SD': 'South Dakota', 'TN': 'Tennessee',
+    'TX': 'Texas', 'UT': 'Utah', 'VA': 'Virginia', 'VT': 'Vermont', 'WA': 'Washington', 
+    'WI': 'Wisconsin', 'WV': 'West Virginia', 'WY': 'Wyoming'
+}
+STATES2 = {
+    'OH': 'Ohio', 'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania',
     'RI': 'Rhode Island', 'SC': 'South Carolina', 'SD': 'South Dakota', 'TN': 'Tennessee',
     'TX': 'Texas', 'UT': 'Utah', 'VA': 'Virginia', 'VT': 'Vermont', 'WA': 'Washington', 
     'WI': 'Wisconsin', 'WV': 'West Virginia', 'WY': 'Wyoming'
@@ -50,8 +59,8 @@ def clean_df(df):
     collapse columns into single column by summing token count Total
     """
     output = df.fillna(0)
-    output['Total'] = df.sum(axis=1)
-    output = output[['Total']]
+    output['count'] = output.sum(axis=1)
+    output = output[['count']]
     return output
 
 def csv_extract(input_file):
@@ -66,11 +75,12 @@ def csv_extract(input_file):
     """
     f = pd.read_csv(input_file)
     df = f[f['Website'].notna()]
-    df = df[['Website','Zip Code']]
+    df = df[['Name ', 'Zip Code', 'State', 'Website']]
 
-    df = df.rename(columns={'Website':'url','Zip Code':'zip'})
+    df = df.rename(columns={'Name ':'name', 'Zip Code':'zip', 'State':'state', 'Website':'url'})
     df['zip'] = df['zip'].astype(str)
     df['zip'] = df['zip'].str.zfill(5)
+    df['url'] = df['url']
     return df
 
 def get_root(url):
@@ -83,7 +93,7 @@ def get_root(url):
     Returns: set of URLs otherwise None
     """
     try:
-        response = s.get(url)
+        response = s.get(url, timeout=5)
         root = lxml.html.fromstring(response.text)
         return root
     except:
@@ -134,11 +144,11 @@ def crawl(url, limit):
     Returns pandas dataframe out of tokenized network of URLs
     """
     dct = {}
-    urls_visited = 0
+    urls_visited = 1
 
     root = get_root(url)
     if root is None:
-        return pd.DataFrame(dct)
+        return None
 
     # Tokenize the base URL (input)
     dct['base'] = tokenize(root)
@@ -153,8 +163,9 @@ def crawl(url, limit):
 
         if urls_visited >= limit:
             break
-
-    return pd.DataFrame(dct)
+    df = pd.DataFrame(dct)
+    # return df
+    return df, urls_visited
 
 def network_crawl(urllst, outpath, limit=50):
     """
@@ -170,29 +181,67 @@ def network_crawl(urllst, outpath, limit=50):
 
     Returns: None, creates csv file
     """
-    # Counter
-    b = 1
+    df = pd.DataFrame()
+    results = {}
 
-    # First URL is put in DF to join with others
-    df = clean_df(crawl(urllst[0], limit))
-
-    for i, b_url in enumerate(urllst[1:]):
-        # Crawl and clean
+    for b, b_url in enumerate(urllst):
+        
         print("Base URL", b, "crawling")
-        new_df = clean_df(crawl(b_url, limit))
+        crawldf = crawl(b_url, limit)
+        if crawldf is None:
+            continue
+
+        nextdf, urls_visited = crawldf
 
         # Join df and new_df
-        df = df.join(new_df.add_suffix(str(i+1)), how='outer')
+        df = df.join(clean_df(nextdf).add_suffix(str(b+1)), how='outer')
         df = df.fillna(0)
+
+        results[b+1] = {'url': b_url, 'urls_visited': urls_visited}
         print("Finished")
-        b += 1
+        
 
     # Clinic/URL-level data
     clinic = df.reset_index()
-    clinic = clinic.rename({'index':'token','Total':'Total0'}, axis=1)
-    clinic.to_csv(outpath.replace("_tokens","_clinics"))
+    clinic = clinic.rename({'index':'token'}, axis=1)
+    clinic = clinic.transpose()
+    clinic = clinic.reset_index()
+
+    # clinic.to_csv(outpath)
+
+    # # # Xwalk
+    res = pd.DataFrame(results)
+    res = res.transpose()
+    res = res.reset_index()
+    res['index'] = "count" +  res['index'].astype(str)
     
-    print("CSV saved")
+    # res.to_csv(outpath.replace("_clinics", "_links"))
+
+    output = pd.merge(clinic, res, left_on='index', right_on='index', how='outer')
+    output.insert(0, 'url', output.pop('url'))
+    output.insert(1, 'urls_visited', output.pop('urls_visited'))
+    
+    output.to_csv(outpath, index=False)
+    
+    # print("CSV saved")
+
+def merge_data(clinics, links):
+    df1 = pd.read_csv(clinics, low_memory=False)
+    df2 = pd.read_csv(links, low_memory=False)
+
+    df2['index'] = "count" +  df2['Unnamed: 0'].astype(str)
+    df2 = df2.drop('Unnamed: 0', axis=1)
+
+    output = pd.merge(df1, df2, left_on='index', right_on='index', how='outer')
+
+    # output = pd.merge(df1, df2, how='outer')
+    output = output.drop('Unnamed: 0', axis=1)
+    output.insert(0, 'url', output.pop('url'))
+    output.insert(1, 'urls_visited', output.pop('urls_visited'))
+
+    output.to_csv(clinics.replace("temp","temp_output"), index=False)
+    # df2['index'] = "count" +  df2['index'].astype(str)
+
 
 # States that are not crawled due to abortion restrictions
 # banned: Alabama Arkansas Idaho Kentucky Louisiana Mississippi Missouri 
@@ -200,29 +249,44 @@ def network_crawl(urllst, outpath, limit=50):
 # stopped scheduling: North Dakota Wisconsin
 if __name__ == "__main__":
 
-    for stabb, name in STATES.items():
+    # for state in STATES.keys():
+    #     clinics = "truth_inquery/temp/CPC_state_clinics.csv".replace("state", state)
+    #     links = "truth_inquery/temp/CPC_state_links.csv".replace("state", state)
+    #     try:
+    #         merge_data(clinics, links)
+    #     except:
+    #         continue
+        # out = clinics.replace("temp","temp_output")
+        # out.to_csv(index=False)
+    # for stabb, name in STATES2.items():
+    # for stabb, name in [("ME", "Maine")]:
         # Crawl CPC urls
-        try:
-            CPCinput = CPCIN + name + " (" + stabb + ").csv"
-            CPCoutput = CPCOUT.replace("state", stabb)
-        except KeyError:
-            print(stabb, "file does not exist")
-            continue
+    #     try:
+    #         CPCinput = CPCIN + name + " (" + stabb + ").csv"
+    #         CPCoutput = CPCOUT.replace("state", stabb)
+    #         df = csv_extract(CPCinput)
+    #     except FileNotFoundError:
+    #         print(stabb, "file does not exist")
+    #         continue
 
-        df = csv_extract(CPCinput)
-        urls = df['url'].tolist()
+    #     urls = df['url'].tolist()
 
-        print("Crawling CPCs in", stabb)
-        network_crawl(urls, CPCoutput, limit=50)
+    #     print("Crawling CPCs in", stabb)
+    #     network_crawl(urls, CPCoutput, LIMIT)
 
+    for stabb, name in STATES.items():
         # Crawl HPC urls
         HPCinput = HPCIN.replace("state", stabb)
         HPCoutput = HPCOUT.replace("state", stabb)
 
-        HPC = pd.read_csv(HPCinput)
-        HPC_urls = list(set(HPC.iloc[0].to_list()))
+        try: 
+            HPC = pd.read_csv(HPCinput)
+        except FileNotFoundError:
+            print(stabb, "file does not exist")
+            continue
+        HPC_urls = HPC['url'].to_list()
 
         print("Crawling HPCs in", stabb)
-        network_crawl(HPC_urls, HPCoutput, limit=50)
+        network_crawl(HPC_urls, HPCoutput, LIMIT)
 
         print(stabb,"CPCs and HPCs saved")
