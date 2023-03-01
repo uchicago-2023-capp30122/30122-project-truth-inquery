@@ -1,4 +1,4 @@
-#poetry run python database.py #run from database_model directoy
+# #poetry run python database.py #run from database_model directoy
 import glob
 import re
 import os
@@ -9,7 +9,7 @@ path1 = "../database_model" #API path truth_inquery/database_model/gestational_l
 path2 = "../output" 
 path3 = "../data" 
 
-def concat_files(path): 
+def concat_files(): 
     """
     A function to assist in API source database creation by first concatenating 
     all the csv format files in a given path and then converting it to a dataframe
@@ -21,7 +21,7 @@ def concat_files(path):
     Returns:
         A compiled dataframe of all the csv files
     """
-    files = glob.glob(path + "/*.csv")
+    files = glob.glob(path1 + "/*.csv")
     dataframe = pd.DataFrame()
     content = []
     for filename in files:
@@ -29,28 +29,6 @@ def concat_files(path):
         content.append(df)
     data_frame = pd.concat(content)
     return data_frame
-
-# def concat_files(path): 
-#     """
-#     A function to assist in API source database creation by first concatenating 
-#     all the csv format files in a given path and then converting it to a dataframe
-#     Input:
-#         index -
-#         A path to the folder in the directory that stores the required csv files
-#         path -
-#         An integer that serves as the index of the datafram
-#     Returns:
-#         A compiled dataframe of all the csv files
-#     """
-#     files = glob.glob(path + "/*.csv")
-#     dataframe = pd.DataFrame()
-#     content = []
-#     for filename in files:
-#         df = pd.read_csv(filename)
-#         content.append(df)
-#     data_frame = pd.concat(content)
-#     return data_frame
-
 
 def clinic_related_db(type, title):
     """
@@ -70,6 +48,8 @@ def clinic_related_db(type, title):
         if re.match(f"{type}_.*\.csv", fname):
             files.append(path3 + "/" + fname) 
     for file_name in files:
+        if type == "CPC":
+            table_name = file_name[file_name.find('(')+1:file_name.find(')')]
         table_name = file_name.split('_')[-1].split(".")[0]
         df = pd.read_csv(file_name)
         df.to_sql(table_name, conn, if_exists='append', index=False)
@@ -99,9 +79,9 @@ def token_related_db(type, title):
         df.to_sql(table_name, conn1, if_exists='append', index=False)
     conn1.close()
 
-### Implements/calls the respective functions for API, CPC and HPC to convert them to 
-### sqlite3 databases
-API_data = concat_files(path1)
+# ### Implements/calls the respective functions for API, CPC and HPC to convert them to 
+# ### sqlite3 databases
+API_data = concat_files()
 conn = sqlite3.connect("api.db")
 API_data.to_sql(name="API", con = conn)
 conn.close()
