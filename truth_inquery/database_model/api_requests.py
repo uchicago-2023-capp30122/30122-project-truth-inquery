@@ -4,7 +4,7 @@ import json
 import pandas as pd
 from urllib.parse import urlparse
 
-apikey = '##########'
+apikey = 'aKCLywC5672'
 
 def make_link_absolute(rel_url, current_url):
     """
@@ -73,7 +73,7 @@ def convert_json_csv():
     for file in files:
         with open(file, encoding='utf-8') as inputfile:
             df = pd.read_json(inputfile)
-        df.to_csv(f"{file[:len(file)-5]}.csv", encoding='utf-8', index=True)
+        df.to_csv(f"{file[:len(file)-5]}.csv", encoding='utf-8', index=False)
 
 convert_json_csv()
  
