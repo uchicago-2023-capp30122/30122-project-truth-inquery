@@ -249,13 +249,13 @@ def merge_data(clinics, links):
 # stopped scheduling: North Dakota Wisconsin
 if __name__ == "__main__":
 
-    # for state in STATES.keys():
-    #     clinics = "truth_inquery/temp/CPC_state_clinics.csv".replace("state", state)
-    #     links = "truth_inquery/temp/CPC_state_links.csv".replace("state", state)
-    #     try:
-    #         merge_data(clinics, links)
-    #     except:
-    #         continue
+    for state in STATES.keys():
+        clinics = "truth_inquery/temp/CPC_state_clinics.csv".replace("state", state)
+        links = "truth_inquery/temp/CPC_state_links.csv".replace("state", state)
+        try:
+            merge_data(clinics, links)
+        except:
+            continue
         # out = clinics.replace("temp","temp_output")
         # out.to_csv(index=False)
     # for stabb, name in STATES2.items():
@@ -274,19 +274,19 @@ if __name__ == "__main__":
     #     print("Crawling CPCs in", stabb)
     #     network_crawl(urls, CPCoutput, LIMIT)
 
-    for stabb, name in STATES.items():
-        # Crawl HPC urls
-        HPCinput = HPCIN.replace("state", stabb)
-        HPCoutput = HPCOUT.replace("state", stabb)
+    # for stabb, name in STATES.items():
+    #     # Crawl HPC urls
+    #     HPCinput = HPCIN.replace("state", stabb)
+    #     HPCoutput = HPCOUT.replace("state", stabb)
 
-        try: 
-            HPC = pd.read_csv(HPCinput)
-        except FileNotFoundError:
-            print(stabb, "file does not exist")
-            continue
-        HPC_urls = HPC['url'].to_list()
+    #     try: 
+    #         HPC = pd.read_csv(HPCinput)
+    #     except FileNotFoundError:
+    #         print(stabb, "file does not exist")
+    #         continue
+    #     HPC_urls = HPC['url'].to_list()
 
-        print("Crawling HPCs in", stabb)
-        network_crawl(HPC_urls, HPCoutput, LIMIT)
+    #     print("Crawling HPCs in", stabb)
+    #     network_crawl(HPC_urls, HPCoutput, LIMIT)
 
-        print(stabb,"CPCs and HPCs saved")
+    #     print(stabb,"CPCs and HPCs saved")
