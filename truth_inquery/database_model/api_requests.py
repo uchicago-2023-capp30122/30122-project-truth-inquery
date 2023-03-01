@@ -59,7 +59,7 @@ def api_calls():
         a = r.json()
         fileName = f"{url_parts[4]}.json"
         files.append(fileName)
-        with open(fileName, "w", encoding='utf-8') as outfile:
+        with open(fileName, "w", encoding = 'utf-8') as outfile:
             json.dump(a, outfile)
     return files
 
@@ -72,9 +72,9 @@ def convert_json_csv():
     """
     files = api_calls()
     for file in files:
-        with open(file, encoding='utf-8') as inputfile:
+        with open(file, encoding = 'utf-8') as inputfile:
             df = pd.read_json(inputfile)
-        df.to_csv(f"{file[:len(file)-5]}.csv", encoding='utf-8', index=False)
+        df.to_csv(f"{file[:len(file)-5]}.csv", encoding = 'utf-8', index = False)
 
 convert_json_csv()
  

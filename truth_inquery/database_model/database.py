@@ -26,7 +26,7 @@ def concat_files():
         df = pd.read_csv(filename)
         content.append(df)
     df = pd.concat(content)
-    df.to_sql(name="API", con = conn)
+    df.to_sql(name = "API", con = conn)
     return conn.close()
 
 
@@ -56,7 +56,7 @@ def concat_clinic_files(type, title):
             df["IV"] = 0
         content.append(df)
     df = pd.concat(content)
-    df.to_sql(name=f"{title}", con = conn)
+    df.to_sql(name = f"{title}", con = conn)
     return conn.close()
 
 
@@ -80,19 +80,19 @@ def token_related_db(type, title):
     for file_name in files_toks:
         table_name = file_name.split('_')[-2].split(".")[0]
         df = pd.read_csv(file_name)
-        df.to_sql(table_name, conn, if_exists='append', index=False)
+        df.to_sql(table_name, conn, if_exists = 'append', index = False)
     conn.close()
 
 
 # Implements/calls the respective functions for API, CPC and HPC to convert them to 
 # sqlite3 databases
-API_data = concat_files()
+concat_files()
 
-cpc_clinics = concat_clinic_files("CPC", "CPC_clinics")
-hpc_clinics = concat_clinic_files("HPC", "HPC_clinics")
+concat_clinic_files("CPC", "CPC_clinics")
+concat_clinic_files("HPC", "HPC_clinics")
 
-Tokens_CPC_clinics = token_related_db("CPC", "Tokens_CPC_clinics")
-Tokens_HPC_clinics = token_related_db("HPC", "Tokens_HPC_clinics")
+token_related_db("CPC", "Tokens_CPC_clinics")
+token_related_db("HPC", "Tokens_HPC_clinics")
 
 
 
