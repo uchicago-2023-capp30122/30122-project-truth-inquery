@@ -226,7 +226,7 @@ def network_crawl(urllst, outpath, limit=50):
     # print("CSV saved")
 
 # def merge_data(clinics, links):
-#     df1 = pd.read_csv(clinics, low_memory=False)
+#     df1 = pd.read_csv(clinics, low_me2mory=False)
 #     df2 = pd.read_csv(links, low_memory=False)
 
 #     df2['index'] = "count" +  df2['Unnamed: 0'].astype(str)
@@ -259,7 +259,7 @@ if __name__ == "__main__":
         # out = clinics.replace("temp","temp_output")
         # out.to_csv(index=False)
     # for stabb, name in STATES2.items():
-    # for stabb, name in [("ME", "Maine")]:
+    # for stabb, name in [("AK", "Alaska")]:
         # Crawl CPC urls
     #     try:
     #         CPCinput = CPCIN + name + " (" + stabb + ").csv"
