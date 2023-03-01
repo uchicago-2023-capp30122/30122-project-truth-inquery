@@ -1,4 +1,3 @@
-,1,2,3,4,5
-url,https://www.plannedparenthood.org/health-center/hawaii/kahului/96732/kahului-health-center-2950-91810,https://hawaiifamilyplanning.org/services/abortionpregnancy-termination-services/,https://hawaiifamilyplanning.org/services/abortionpregnancy-termination-services/,https://hawaiifamilyplanning.org/services/abortionpregnancy-termination-services/,https://hawaiifamilyplanning.org/services/abortionpregnancy-termination-services/
-distance,83.6 mi. away,2.6 mi. away,9.9 mi. away,10.7 mi. away,13.7 mi. away
-address,"140 Hoohana Street, Suite 303, Kahului, HI 96732","1380 Lusitana Street, Suite 1004, Honolulu, HI 96813","1380 Lusitana Street, Suite 1004, Honolulu, HI 96813","1380 Lusitana Street, Suite 1004, Honolulu, HI 96813","1380 Lusitana Street, Suite 1004, Honolulu, HI 96813"
+,url,distance,address,state
+1,https://www.plannedparenthood.org/health-center/hawaii/kahului/96732/kahului-health-center-2950-91810,83.6,"140 Hoohana Street, Suite 303, Kahului, HI 96732",HI
+2,https://hawaiifamilyplanning.org/services/abortionpregnancy-termination-services/,2.6,"1380 Lusitana Street, Suite 1004, Honolulu, HI 96813",HI

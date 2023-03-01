@@ -1,4 +1,7 @@
-,1,2,3,4,5,6,7,8,9
-url,https://www.plannedparenthood.org/health-center/new-hampshire/manchester/03104/manchester-health-center-2740-91770,https://www.plannedparenthood.org/health-center/new-hampshire/manchester/03104/manchester-health-center-2740-91770,https://www.equalityhc.org/,http://joangloveringhealthcenter.org/choice/,http://joangloveringhealthcenter.org/choice/,https://www.dartmouth-hitchcock.org/obgyn/family-planning,https://www.plannedparenthood.org/health-center/new-hampshire/keene/03431/keene-health-center-2744-91770,https://www.equalityhc.org/,http://www.manchesterob.com/
-distance,0.8 mi. away,5.8 mi. away,26.2 mi. away,3.5 mi. away,10.5 mi. away,29.7 mi. away,2.0 mi. away,0.8 mi. away,8.0 mi. away
-address,"24 Pennacook Street, Manchester, NH 03104","24 Pennacook Street, Manchester, NH 03104","38 South Main Street, Concord, NH 03301","559 Portsmouth Avenue, Greenland, NH 03840","559 Portsmouth Avenue, Greenland, NH 03840","One Medical Center Drive, Reception 5L, Lebanon, NH 03756","8 Middle Street, Keene, NH 03431","38 South Main Street, Concord, NH 03301","150 Tarrytown Road, Manchester, NH 03103"
+,url,distance,address,state
+1,https://www.plannedparenthood.org/health-center/new-hampshire/manchester/03104/manchester-health-center-2740-91770,0.8,"24 Pennacook Street, Manchester, NH 03104",NH
+3,https://www.equalityhc.org/,26.2,"38 South Main Street, Concord, NH 03301",NH
+4,http://joangloveringhealthcenter.org/choice/,3.5,"559 Portsmouth Avenue, Greenland, NH 03840",NH
+6,https://www.dartmouth-hitchcock.org/obgyn/family-planning,29.7,"One Medical Center Drive, Reception 5L, Lebanon, NH 03756",NH
+7,https://www.plannedparenthood.org/health-center/new-hampshire/keene/03431/keene-health-center-2744-91770,2.0,"8 Middle Street, Keene, NH 03431",NH
+9,http://www.manchesterob.com/,8.0,"150 Tarrytown Road, Manchester, NH 03103",NH

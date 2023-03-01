@@ -1,4 +1,6 @@
-,1,2,3,4,5,6,7
-url,https://www.plannedparenthood.org/health-center/nevada/las-vegas/89102/las-vegas-west-charleston-2304-90210,https://lvgyn.com/,https://abortioninreno.com/,https://www.plannedparenthood.org/health-center/nevada/las-vegas/89121/las-vegas-east-flamingo-2306-90210,https://abortioninreno.com/,https://abortioninreno.com/,https://www.plannedparenthood.org/health-center/nevada/reno/89503/fifth-street-health-center-2262-90130
-distance,0.9 mi. away,48.8 mi. away,21.6 mi. away,2.7 mi. away,37.6 mi. away,53.2 mi. away,2.4 mi. away
-address,"3220 W Charleston Blvd., Las Vegas, NV 89102","7908 West Sahara Avenue, Las Vegas, NV 89117","5915 Tyrone Road, Reno, NV 89502","3300 E Flamingo Rd #25, Las Vegas, NV 89121","5915 Tyrone Road, Reno, NV 89502","5915 Tyrone Road, Reno, NV 89502","455 W. 5th Street, Reno, NV 89503"
+,url,distance,address,state
+1,https://www.plannedparenthood.org/health-center/nevada/las-vegas/89102/las-vegas-west-charleston-2304-90210,0.9,"3220 W Charleston Blvd., Las Vegas, NV 89102",NV
+2,https://lvgyn.com/,48.8,"7908 West Sahara Avenue, Las Vegas, NV 89117",NV
+3,https://abortioninreno.com/,21.6,"5915 Tyrone Road, Reno, NV 89502",NV
+4,https://www.plannedparenthood.org/health-center/nevada/las-vegas/89121/las-vegas-east-flamingo-2306-90210,2.7,"3300 E Flamingo Rd #25, Las Vegas, NV 89121",NV
+7,https://www.plannedparenthood.org/health-center/nevada/reno/89503/fifth-street-health-center-2262-90130,2.4,"455 W. 5th Street, Reno, NV 89503",NV

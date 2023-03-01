@@ -1,4 +1,3 @@
-,1,2,3
-url,https://www.plannedparenthood.org/health-center/rhode-island/providence/02903/providence-health-center-3362-90220,https://www.womenandinfants.org/services/gynecology/family-planning-clinic?hsCtaTracking=2ce6abc5-8613-46d2-b7f6-e96576917195%7C0398585a-1455-423c-a790-da51ae8d9492,https://www.plannedparenthood.org/health-center/rhode-island/providence/02903/providence-health-center-3362-90220
-distance,3.8 mi. away,2.7 mi. away,6.8 mi. away
-address,"175 Broad Street, Providence, RI 02903","2 Dudley Street, 5th Floor, Providence, RI 02905","175 Broad Street, Providence, RI 02903"
+,url,distance,address,state
+1,https://www.plannedparenthood.org/health-center/rhode-island/providence/02903/providence-health-center-3362-90220,3.8,"175 Broad Street, Providence, RI 02903",RI
+2,https://www.womenandinfants.org/services/gynecology/family-planning-clinic?hsCtaTracking=2ce6abc5-8613-46d2-b7f6-e96576917195%7C0398585a-1455-423c-a790-da51ae8d9492,2.7,"2 Dudley Street, 5th Floor, Providence, RI 02905",RI

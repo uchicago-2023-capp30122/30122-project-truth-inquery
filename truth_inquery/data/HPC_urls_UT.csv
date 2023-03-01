@@ -1,4 +1,3 @@
-,1,2,3,4,5,6
-url,https://www.plannedparenthood.org/health-center/utah/salt-lake-city/84102/metro-health-center-3958-91730,https://www.plannedparenthood.org/health-center/utah/salt-lake-city/84102/metro-health-center-3958-91730,http://www.wasatchwomenscenter.net/,http://www.wasatchwomenscenter.net/,https://www.plannedparenthood.org/health-center/utah/salt-lake-city/84102/metro-health-center-3958-91730,https://www.plannedparenthood.org/health-center/utah/salt-lake-city/84102/metro-health-center-3958-91730
-distance,29.8 mi. away,66.1 mi. away,19.8 mi. away,93.8 mi. away,0.4 mi. away,53.4 mi. away
-address,"160 South 1000 East, Suite 120, Salt Lake City, UT 84102","160 South 1000 East, Suite 120, Salt Lake City, UT 84102","715 East 3900 South, Suite 203, Salt Lake City, UT 84107","715 East 3900 South, Suite 203, Salt Lake City, UT 84107","160 South 1000 East, Suite 120, Salt Lake City, UT 84102","160 South 1000 East, Suite 120, Salt Lake City, UT 84102"
+,url,distance,address,state
+1,https://www.plannedparenthood.org/health-center/utah/salt-lake-city/84102/metro-health-center-3958-91730,29.8,"160 South 1000 East, Suite 120, Salt Lake City, UT 84102",UT
+3,http://www.wasatchwomenscenter.net/,19.8,"715 East 3900 South, Suite 203, Salt Lake City, UT 84107",UT

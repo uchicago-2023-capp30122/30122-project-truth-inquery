@@ -1,4 +1,5 @@
-,1,2,3,4,5
-url,https://www.plannedparenthood.org/health-center/vermont/burlington/05401/burlington-health-center-2650-91770,https://www.plannedparenthood.org/health-center/vermont/williston/05495/williston-health-center-3317-91770,https://www.plannedparenthood.org/health-center/vermont/williston/05495/williston-health-center-3317-91770,https://www.plannedparenthood.org/health-center/vermont/barre/05641/barre-health-center-2654-91770,https://www.plannedparenthood.org/health-center/vermont/rutland/05701/rutland-health-center-4229-91770
-distance,0.1 mi. away,29.4 mi. away,1.1 mi. away,0.8 mi. away,2.6 mi. away
-address,"173 Saint Paul Street, Burlington, VT 05401","75 Talcott Road, Suite 10, Williston, VT 05495","75 Talcott Road, Suite 10, Williston, VT 05495","90 Washington Street, Barre, VT 05641","11 Burham Avenue, Rutland, VT 05701"
+,url,distance,address,state
+1,https://www.plannedparenthood.org/health-center/vermont/burlington/05401/burlington-health-center-2650-91770,0.1,"173 Saint Paul Street, Burlington, VT 05401",VT
+2,https://www.plannedparenthood.org/health-center/vermont/williston/05495/williston-health-center-3317-91770,29.4,"75 Talcott Road, Suite 10, Williston, VT 05495",VT
+4,https://www.plannedparenthood.org/health-center/vermont/barre/05641/barre-health-center-2654-91770,0.8,"90 Washington Street, Barre, VT 05641",VT
+5,https://www.plannedparenthood.org/health-center/vermont/rutland/05701/rutland-health-center-4229-91770,2.6,"11 Burham Avenue, Rutland, VT 05701",VT
