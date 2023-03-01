@@ -1,10 +1,11 @@
 #poetry run python api_requests.py
+#run from database_model directoy
 import requests
 import json
 import pandas as pd
 from urllib.parse import urlparse
 
-apikey = '########'
+apikey = '#################'
 
 def make_link_absolute(rel_url, current_url):
     """
