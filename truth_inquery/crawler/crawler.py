@@ -13,7 +13,7 @@ LIMIT = 25
 CPCIN = "truth_inquery/data/CPC_"
 CPCOUT = "truth_inquery/temp/CPC_state_clinics.csv"
 HPCIN = "truth_inquery/data/HPC_urls_state.csv"
-HPCOUT = "truth_inquery/temp/HPC_state_clinics.csv"
+HPCOUT = "truth_inquery/temp_output/HPC_state_clinics.csv"
 
 PATTERN = r'[\[0-9()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
 
@@ -225,21 +225,21 @@ def network_crawl(urllst, outpath, limit=50):
     
     # print("CSV saved")
 
-def merge_data(clinics, links):
-    df1 = pd.read_csv(clinics, low_memory=False)
-    df2 = pd.read_csv(links, low_memory=False)
+# def merge_data(clinics, links):
+#     df1 = pd.read_csv(clinics, low_memory=False)
+#     df2 = pd.read_csv(links, low_memory=False)
 
-    df2['index'] = "count" +  df2['Unnamed: 0'].astype(str)
-    df2 = df2.drop('Unnamed: 0', axis=1)
+#     df2['index'] = "count" +  df2['Unnamed: 0'].astype(str)
+#     df2 = df2.drop('Unnamed: 0', axis=1)
 
-    output = pd.merge(df1, df2, left_on='index', right_on='index', how='outer')
+#     output = pd.merge(df1, df2, left_on='index', right_on='index', how='outer')
 
-    # output = pd.merge(df1, df2, how='outer')
-    output = output.drop('Unnamed: 0', axis=1)
-    output.insert(0, 'url', output.pop('url'))
-    output.insert(1, 'urls_visited', output.pop('urls_visited'))
+#     # output = pd.merge(df1, df2, how='outer')
+#     output = output.drop('Unnamed: 0', axis=1)
+#     output.insert(0, 'url', output.pop('url'))
+#     output.insert(1, 'urls_visited', output.pop('urls_visited'))
 
-    output.to_csv(clinics.replace("temp","temp_output"), index=False)
+#     output.to_csv(clinics.replace("temp","temp_output"), index=False)
     # df2['index'] = "count" +  df2['index'].astype(str)
 
 
@@ -249,13 +249,13 @@ def merge_data(clinics, links):
 # stopped scheduling: North Dakota Wisconsin
 if __name__ == "__main__":
 
-    for state in STATES.keys():
-        clinics = "truth_inquery/temp/CPC_state_clinics.csv".replace("state", state)
-        links = "truth_inquery/temp/CPC_state_links.csv".replace("state", state)
-        try:
-            merge_data(clinics, links)
-        except:
-            continue
+    # for state in STATES.keys():
+    #     clinics = "truth_inquery/temp/CPC_state_clinics.csv".replace("state", state)
+    #     links = "truth_inquery/temp/CPC_state_links.csv".replace("state", state)
+    #     try:
+    #         merge_data(clinics, links)
+    #     except:
+    #         continue
         # out = clinics.replace("temp","temp_output")
         # out.to_csv(index=False)
     # for stabb, name in STATES2.items():
@@ -274,19 +274,19 @@ if __name__ == "__main__":
     #     print("Crawling CPCs in", stabb)
     #     network_crawl(urls, CPCoutput, LIMIT)
 
-    # for stabb, name in STATES.items():
-    #     # Crawl HPC urls
-    #     HPCinput = HPCIN.replace("state", stabb)
-    #     HPCoutput = HPCOUT.replace("state", stabb)
+    for stabb, name in STATES.items():
+        # Crawl HPC urls
+        HPCinput = HPCIN.replace("state", stabb)
+        HPCoutput = HPCOUT.replace("state", stabb)
 
-    #     try: 
-    #         HPC = pd.read_csv(HPCinput)
-    #     except FileNotFoundError:
-    #         print(stabb, "file does not exist")
-    #         continue
-    #     HPC_urls = HPC['url'].to_list()
+        try: 
+            HPC = pd.read_csv(HPCinput)
+        except FileNotFoundError:
+            print(stabb, "file does not exist")
+            continue
+        HPC_urls = HPC['url'].to_list()
 
-    #     print("Crawling HPCs in", stabb)
-    #     network_crawl(HPC_urls, HPCoutput, LIMIT)
+        print("Crawling HPCs in", stabb)
+        network_crawl(HPC_urls, HPCoutput, LIMIT)
 
-    #     print(stabb,"CPCs and HPCs saved")
+        print(stabb,"CPCs and HPCs saved")
