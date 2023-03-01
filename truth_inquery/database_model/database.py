@@ -50,7 +50,8 @@ def clinic_related_db(type, title):
     for file_name in files:
         if type == "CPC":
             table_name = file_name[file_name.find('(')+1:file_name.find(')')]
-        table_name = file_name.split('_')[-1].split(".")[0]
+        else:
+            table_name = file_name.split('_')[-1].split(".")[0]
         df = pd.read_csv(file_name)
         df.to_sql(table_name, conn, if_exists='append', index=False)
     conn.close()
