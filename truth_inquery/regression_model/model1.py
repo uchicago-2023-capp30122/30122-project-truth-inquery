@@ -1,4 +1,7 @@
 from sklearn import linear_model
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error
+from sklearn.linear_model import LinearRegression
 import pandas
 import sqlite3
 import json
@@ -109,93 +112,26 @@ print()
 
 # Step 9: select all input variables (api legal status, top 10 token counts, etc) into a single dataframe X
 
+x_df = cpchpcpolicy_df[["waiting_period_hours", "counseling_visits", "banned_after_weeks_since_LMP"]]
 
 # Step 10: select all outcome variables, in this case (is_cpc) into a single dataframe y
 
+y_df = cpchpcpolicy_df[["IV"]]
 
 # Step 11: Split the finalized flattened and joined combined_and_joined_clinic_dataframe into train and test subsets using sklearn
-# from sklearn.metrics import mean_squared_error
-# y_pred = reg.predict(X_test)
-# mean_squared_error(y_test, y_pred)
+
+X_train, X_test, y_train, y_test = train_test_split(x_df, y_df, test_size=0.2, random_state=25)
+
+reg = LinearRegression().fit(X_train, y_train)
+
+y_pred = reg.predict(X_test)
+mean_squared_error(y_test, y_pred)
 
 
 # Step 12: build the regression model from the training subset
 # from sklearn.linear_model import LinearRegression
-# reg = LinearRegression().fit(X_train, y_train)
+
 
 # Step 13: test the regression model on the test subset
 
 
-# cpc_state_list = ['AK',  'CA',  'CT',  'DE',  'GA',  'IA',  'IN',  'MA',  'ME',  'MN',  
-# 'NC',  'NH',  'NM', 'NY',  'OR',  'RI',  'UT',  'VT',  'WY', 'AZ',  'CO',  'DC', 'FL',  
-# 'HI',  'IL',  'KS',  'MD',  'MI',  'MT',  'NE',  'NJ',  'NV', 'OH',  'PA',  'SC',  'VA',  'WA']
-
-
-#print(cpc_state_list)
-
-
-# this won't work with the current "by state" implementation. Maybe there is a workaround if I use a loop through the tables?
-# currently it's written for the previous implementation - not 'by state'
-# cpc_query = 'SELECT * FROM CPC_clinics'
-# def abc(one, two, table):
-#     """
-#     """
-#     cpc_query = f"SELECT {}, {} FROM {}" 
-
-
-# for state in cpc_state_list:
-#     sample = abc(state, website, state)
-#     print(sample)
-
-
-#   "Kentucky" TEXT,
-#   "Oklahoma" TEXT,
-#   "Kansas" TEXT,
-#   "Ohio" TEXT,
-#   "Arizona" TEXT,
-#   "Mississippi" TEXT,
-#   "Tennessee" TEXT,
-#   "Wisconsin" TEXT,
-#   "Alabama" TEXT,
-#   "Missouri" TEXT,
-#   "Idaho" TEXT,
-#   "Virginia" TEXT,
-#   "Pennsylvania" TEXT,
-#   "Florida" TEXT,
-#   "South Carolina" TEXT,
-#   "Georgia" TEXT,
-#   "Minnesota" TEXT,
-#   "Indiana" TEXT,
-#   "Utah" TEXT,
-#   "North Carolina" TEXT,
-#   "Arkansas" TEXT,
-#   "North Dakota" TEXT,
-#   "Iowa" TEXT,
-#   "Michigan" REAL,
-#   "Nebraska" TEXT,
-#   "South Dakota" TEXT,
-#   "Louisiana" TEXT,
-#   "Texas" TEXT,
-#   "Alaska" TEXT,
-#   "West Virginia" TEXT,
-#   "Nevada" TEXT,
-#   "New Hampshire" TEXT,
-#   "Maine" TEXT,
-#   "New York" TEXT,
-#   "Wyoming"
-#   "Oregon"
-#   "California"
-#   "New Jersey"
-#   "Massachusetts"
-#   "Delaware" 
-#   "Maryland" 
-#   "Connecticut" 
-#   "Colorado" 
-#   "District of Columbia" 
-#   "Vermont" 
-#   "Illinois"
-#   "New Mexico"
-#   "Montana"
-#   "Hawaii"
-#   "Rhode Island"
-#   "Washington"
