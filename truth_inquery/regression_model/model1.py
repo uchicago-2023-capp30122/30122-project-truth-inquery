@@ -1,4 +1,4 @@
-from sklearn import linear_model
+from sklearn import linear_model, mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression
@@ -80,6 +80,8 @@ policyapi_dataframe.columns = policyapi_dataframe.iloc[0]
 policyapi_dataframe = policyapi_dataframe.iloc[1:]
 policyapi_dataframe.index = policyapi_dataframe.index.map(states.name_to_abbrev)
 policyapi_dataframe["state"] = policyapi_dataframe.index
+policyapi_fill_missing_values_map = {"waiting_period_hours" : 0, "counseling_visits" : 0, "banned_after_weeks_since_LMP" : 0}
+policyapi_dataframe = policyapi_dataframe.fillna(value = policyapi_fill_missing_values_map)
 
 print()
 print(policyapi_dataframe)
@@ -114,6 +116,10 @@ print()
 
 x_df = cpchpcpolicy_df[["waiting_period_hours", "counseling_visits", "banned_after_weeks_since_LMP"]]
 
+print()
+print(x_df)
+print()
+
 # Step 10: select all outcome variables, in this case (is_cpc) into a single dataframe y
 
 y_df = cpchpcpolicy_df[["IV"]]
@@ -126,6 +132,16 @@ reg = LinearRegression().fit(X_train, y_train)
 
 y_pred = reg.predict(X_test)
 mean_squared_error(y_test, y_pred)
+
+# The coefficients
+print("Coefficients: \n", reg.coef_)
+
+# The mean squared error
+print("Mean squared error: %.2f" % mean_squared_error(y_test, y_pred))
+
+
+# The coefficient of determination: 1 is perfect prediction
+print("Coefficient of determination: %.2f" % r2_score(y_test, y_pred))
 
 
 # Step 12: build the regression model from the training subset
