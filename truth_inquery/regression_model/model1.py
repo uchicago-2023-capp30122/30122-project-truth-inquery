@@ -1,6 +1,8 @@
 from sklearn import linear_model
 import pandas
 import sqlite3
+import json
+import states
 
 # 
 # Step 1: correct schema difference between CPC and HPC clinic data 
@@ -15,6 +17,9 @@ cpc_query= 'SELECT IV, Website, State FROM CPC_Clinics'
 
 cpc_dataframe = pandas.read_sql_query(cpc_query, cpc_connection)
 cpc_dataframe = cpc_dataframe.rename(columns = {"Website" : "url", "State" : "state"})
+cpc_dataframe["state"] = cpc_dataframe["state"].str[-4:]
+cpc_dataframe["state"] = cpc_dataframe["state"].str.replace(r'[()]',"", regex = True)
+
 print()
 print(cpc_dataframe.head())
 print()
@@ -44,8 +49,6 @@ hpc_connection.close()
 
 # Dema did this
 
-
-
 # Step 6: Combine the cpc_dataframe and hpc_dataframe one on top of another. Cascade? We can call this combined_clinic_dataframe
 
 cpc_and_hpc_dataframe = pandas.concat([cpc_dataframe, hpc_dataframe], ignore_index = True, axis = 0)
@@ -55,18 +58,53 @@ print()
 
 
 
-# Step 7: putting API data into a dataframe . . . hmmm. . each row would be a state?
+# Step 7: putting API data into a dataframe
 
-# policyapi_connection = sqlite3.connect('truth_inquery/database_model/api.db')
+policyapi_connection = sqlite3.connect('../database_model/api.db')
 
-# policyapi_query = 'SELECT * FROM '
+policyapi_cursor = policyapi_connection.cursor()
 
-# api_dataframe = pandas.read_sql_query(policyapi_query, policyapi_connection)
+policyapi_query = "SELECT * FROM API"
+
+policyapi_dataframe = pandas.read_sql_query(policyapi_query, policyapi_connection)
+
+# transpose the dataframe and adjust the index header so that policy features like 
+# "waiting_period_hours" are the columns, and mapping the full state names onto
+# abbreviated state names
+policyapi_dataframe = policyapi_dataframe.T
+policyapi_dataframe = policyapi_dataframe[1:]
+policyapi_dataframe.columns = policyapi_dataframe.iloc[0]
+policyapi_dataframe = policyapi_dataframe.iloc[1:]
+policyapi_dataframe.index = policyapi_dataframe.index.map(states.name_to_abbrev)
+policyapi_dataframe["state"] = policyapi_dataframe.index
+
+print()
+print(policyapi_dataframe)
+print()
+
+policyapi_dataframe
+
+print()
+print(policyapi_dataframe)
+print()
+
+
+
+
 
 # policyapi_connection.close()
 
 
-# Step 8: join api_dataframe to combined_clinic_dateframe . . . on state?
+# Step 8: join api_dataframe to combined_clinic_dateframe . . . on state
+
+cpchpcpolicy_df = pandas.merge(cpc_and_hpc_dataframe, policyapi_dataframe, on = "state", how = "inner")
+
+print()
+print(cpchpcpolicy_df)
+print()
+
+
+
 
 
 # Step 9: select all input variables (api legal status, top 10 token counts, etc) into a single dataframe X
@@ -108,3 +146,56 @@ print()
 # for state in cpc_state_list:
 #     sample = abc(state, website, state)
 #     print(sample)
+
+
+#   "Kentucky" TEXT,
+#   "Oklahoma" TEXT,
+#   "Kansas" TEXT,
+#   "Ohio" TEXT,
+#   "Arizona" TEXT,
+#   "Mississippi" TEXT,
+#   "Tennessee" TEXT,
+#   "Wisconsin" TEXT,
+#   "Alabama" TEXT,
+#   "Missouri" TEXT,
+#   "Idaho" TEXT,
+#   "Virginia" TEXT,
+#   "Pennsylvania" TEXT,
+#   "Florida" TEXT,
+#   "South Carolina" TEXT,
+#   "Georgia" TEXT,
+#   "Minnesota" TEXT,
+#   "Indiana" TEXT,
+#   "Utah" TEXT,
+#   "North Carolina" TEXT,
+#   "Arkansas" TEXT,
+#   "North Dakota" TEXT,
+#   "Iowa" TEXT,
+#   "Michigan" REAL,
+#   "Nebraska" TEXT,
+#   "South Dakota" TEXT,
+#   "Louisiana" TEXT,
+#   "Texas" TEXT,
+#   "Alaska" TEXT,
+#   "West Virginia" TEXT,
+#   "Nevada" TEXT,
+#   "New Hampshire" TEXT,
+#   "Maine" TEXT,
+#   "New York" TEXT,
+#   "Wyoming"
+#   "Oregon"
+#   "California"
+#   "New Jersey"
+#   "Massachusetts"
+#   "Delaware" 
+#   "Maryland" 
+#   "Connecticut" 
+#   "Colorado" 
+#   "District of Columbia" 
+#   "Vermont" 
+#   "Illinois"
+#   "New Mexico"
+#   "Montana"
+#   "Hawaii"
+#   "Rhode Island"
+#   "Washington"
