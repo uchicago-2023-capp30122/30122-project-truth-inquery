@@ -5,7 +5,8 @@ import json
 import pandas as pd
 from urllib.parse import urlparse
 
-apikey = '#########'
+apikey = '##########'
+dir_path = "../truth_inquery/database_model" 
 
 def make_link_absolute(rel_url, current_url):
     """
@@ -62,6 +63,7 @@ def api_calls():
         with open(fileName, "w", encoding = 'utf-8') as outfile:
             json.dump(a, outfile)
     return files
+
 
 def convert_json_csv():
     """
