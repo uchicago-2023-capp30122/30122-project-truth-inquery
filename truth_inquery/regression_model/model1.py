@@ -1,6 +1,6 @@
-from sklearn import linear_model, mean_squared_error, r2_score
+from sklearn import linear_model
+from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression
 import pandas
 import sqlite3
