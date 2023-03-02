@@ -1,5 +1,4 @@
-#poetry run python database.py 
-#run from database_model directoy
+#poetry run python database_model/database.py
 import glob
 import re
 import os
@@ -7,9 +6,9 @@ import pandas as pd
 import sqlite3
 
 
-path1 = "../database_model" 
-path2 = "../output" 
-path3 = "../data" 
+path1 = "../truth_inquery/database_model" 
+path2 = "../truth_inquery/output" 
+path3 = "../truth_inquery/data" 
 
 
 def concat_files(): 
