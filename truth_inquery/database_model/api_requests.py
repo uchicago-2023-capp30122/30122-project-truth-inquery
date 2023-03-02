@@ -1,11 +1,12 @@
-#poetry run python api_requests.py
-#run from database_model directoy
+#poetry run python database_model/api_requests.py
+import os
 import requests
 import json
 import pandas as pd
 from urllib.parse import urlparse
 
-apikey = '#########'
+apikey = '##########'
+dir_path = "../truth_inquery/database_model" 
 
 def make_link_absolute(rel_url, current_url):
     """
@@ -58,10 +59,12 @@ def api_calls():
         r = requests.get(url, headers=headers)
         a = r.json()
         fileName = f"{url_parts[4]}.json"
-        files.append(fileName)
-        with open(fileName, "w", encoding = 'utf-8') as outfile:
+        filepath = os.path.join(dir_path, fileName)
+        files.append(filepath)
+        with open(filepath, "w", encoding = 'utf-8') as outfile:
             json.dump(a, outfile)
     return files
+
 
 def convert_json_csv():
     """
@@ -74,7 +77,7 @@ def convert_json_csv():
     for file in files:
         with open(file, encoding = 'utf-8') as inputfile:
             df = pd.read_json(inputfile)
-        df.to_csv(f"{file[:len(file)-5]}.csv", encoding = 'utf-8', index = True)
+            df.to_csv(f"{file}.csv", encoding = 'utf-8', index = True)
 
-convert_json_csv()
- 
+
+convert_json_csv() 
