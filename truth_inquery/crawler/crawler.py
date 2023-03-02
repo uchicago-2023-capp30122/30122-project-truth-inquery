@@ -31,12 +31,6 @@ STATES = {
     'TX': 'Texas', 'UT': 'Utah', 'VA': 'Virginia', 'VT': 'Vermont', 'WA': 'Washington', 
     'WI': 'Wisconsin', 'WV': 'West Virginia', 'WY': 'Wyoming'
 }
-STATES2 = {
-    'OH': 'Ohio', 'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania',
-    'RI': 'Rhode Island', 'SC': 'South Carolina', 'SD': 'South Dakota', 'TN': 'Tennessee',
-    'TX': 'Texas', 'UT': 'Utah', 'VA': 'Virginia', 'VT': 'Vermont', 'WA': 'Washington', 
-    'WI': 'Wisconsin', 'WV': 'West Virginia', 'WY': 'Wyoming'
-}
 
 INDEX_IGNORE = (
     "and",
@@ -109,7 +103,7 @@ def tokenize(root):
     
     Returns: dictionary of token-frequency key-values pairs.
     """
-    tokens = {}
+    tokens = defaultdict(int)
     pattern = re.compile(PATTERN)
 
     # Spend a maximum of 5 minutes tokenizing text
@@ -118,15 +112,14 @@ def tokenize(root):
 
     for key in all_text.split():
         str_key = str(key).lower()
+
         # Ignore if token contains any chars in pattern
         if re.search(pattern, str_key) is not None:
             continue
         # Word exclusion and length restrictions
         if str_key not in INDEX_IGNORE and len(str_key) > 2 and len(str_key) < 25:
-            if str_key not in tokens:
-                tokens[str_key] = 1
-            else:
-                tokens[str_key] += 1
+            tokens[str_key] += 1
+
         # Checks time EVERY token - not ideal?
         if time.time() > timeout:
             return tokens
@@ -143,7 +136,7 @@ def crawl(url, limit):
 
     Returns pandas dataframe out of tokenized network of URLs
     """
-    dct = {}
+    dct = defaultdict(dict)
     urls_visited = 1
 
     root = get_root(url)
@@ -161,10 +154,10 @@ def crawl(url, limit):
             urls_visited += 1
             dct['url'+str(urls_visited)] = tokenize(subroot)
 
-        if urls_visited >= limit:
+        if urls_visited == limit:
             break
+
     df = pd.DataFrame(dct)
-    # return df
     return df, urls_visited
 
 def network_crawl(urllst, outpath, limit=50):
@@ -182,10 +175,10 @@ def network_crawl(urllst, outpath, limit=50):
     Returns: None, creates csv file
     """
     df = pd.DataFrame()
-    results = {}
+    results = defaultdict(dict)
 
     for b, b_url in enumerate(urllst):
-        
+
         print("Base URL", b, "crawling")
         crawldf = crawl(b_url, limit)
         if crawldf is None:
@@ -199,8 +192,9 @@ def network_crawl(urllst, outpath, limit=50):
 
         results[b+1] = {'url': b_url, 'urls_visited': urls_visited}
         print("Finished")
-        
 
+
+    # Prep URL-level data and results for merge
     # Clinic/URL-level data
     clinic = df.reset_index()
     clinic = clinic.rename({'index':'token'}, axis=1)
@@ -223,6 +217,24 @@ def network_crawl(urllst, outpath, limit=50):
     
     output.to_csv(outpath, index=False)
     
+def top_clinic_tokens(csv, num):
+    """
+    Cleans token-count pandas dataframe for single URL (clinic)
+
+    Inputs
+        - df: (pd dataframe) dataframe as token-count columns (2)
+        - col (string): column with token counts of URL
+        - top_num (int): number of top tokens to return
+
+    Returns standardized dataframe of nlargest tokens by count 
+    """
+    # filter and sort
+    df = pd.read_csv(csv)
+    df = df.transpose()
+
+    # node = df[~df['token'].str.contains('|'.join(TOKEN_IGNORE), na = False)]
+    # node = node[['token', col]].sort_values(by=[col], ascending=False)
+    # node = node.rename(columns = {col: 'Count'})
     # print("CSV saved")
 
 # def merge_data(clinics, links):
@@ -259,7 +271,7 @@ if __name__ == "__main__":
         # out = clinics.replace("temp","temp_output")
         # out.to_csv(index=False)
     # for stabb, name in STATES2.items():
-    # for stabb, name in [("AK", "Alaska")]:
+    # for stabb in ["CA"]:
         # Crawl CPC urls
     #     try:
     #         CPCinput = CPCIN + name + " (" + stabb + ").csv"
@@ -274,7 +286,7 @@ if __name__ == "__main__":
     #     print("Crawling CPCs in", stabb)
     #     network_crawl(urls, CPCoutput, LIMIT)
 
-    for stabb, name in STATES.items():
+    for stabb, name in STATES2.items():
         # Crawl HPC urls
         HPCinput = HPCIN.replace("state", stabb)
         HPCoutput = HPCOUT.replace("state", stabb)
