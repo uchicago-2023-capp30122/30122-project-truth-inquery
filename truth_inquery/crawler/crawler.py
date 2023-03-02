@@ -47,7 +47,7 @@ INDEX_IGNORE = (
     "with"
 )
 
-def clean_df(df):
+def clean_df(df, n=""):
     """
     Clean pd dataframe. replace NaN with 0.
     collapse columns into single column by summing token count Total
@@ -55,6 +55,17 @@ def clean_df(df):
     output = df.fillna(0)
     output['count'] = output.sum(axis=1)
     output = output[['count']]
+
+    output['count'] = output.sum(numeric_only=True, axis=1)
+    output = output[['token', 'count']]
+    output = output.sort_values(by=['count'], axis=0, ascending = False)
+    # output = output[['count'][:150]]
+    # not this 
+    # output = output['count'][:150]
+    # output = output.iloc(0:100,axis=0]
+
+    # Keep top X
+
     return output
 
 def csv_extract(input_file):
@@ -160,7 +171,7 @@ def crawl(url, limit):
     df = pd.DataFrame(dct)
     return df, urls_visited
 
-def network_crawl(urllst, outpath, limit=50):
+def network_crawl(urllst, outpath, limit=2):
     """
     Takes in URL list as list of base urls and crawls up to 
     the limit # of adjacent URLs (one click away)
@@ -198,24 +209,22 @@ def network_crawl(urllst, outpath, limit=50):
     # Clinic/URL-level data
     clinic = df.reset_index()
     clinic = clinic.rename({'index':'token'}, axis=1)
-    clinic = clinic.transpose()
-    clinic = clinic.reset_index()
+    # clinic = clinic.transpose()
+    # clinic = clinic.reset_index()
 
+    return clinic
     # clinic.to_csv(outpath)
 
     # # # Xwalk
-    res = pd.DataFrame(results)
-    res = res.transpose()
-    res = res.reset_index()
-    res['index'] = "count" +  res['index'].astype(str)
+    # res = pd.DataFrame(results)
+    # res = res.transpose()
+    # res = res.reset_index()
+    # res['index'] = "count" +  res['index'].astype(str)
     
-    # res.to_csv(outpath.replace("_clinics", "_links"))
+    # # res.to_csv(outpath.replace("_clinics", "_links"))
 
-    output = pd.merge(clinic, res, left_on='index', right_on='index', how='outer')
-    output.insert(0, 'url', output.pop('url'))
-    output.insert(1, 'urls_visited', output.pop('urls_visited'))
-    
-    output.to_csv(outpath, index=False)
+    # output = pd.merge(clinic, res, left_on='index', right_on='index', how='outer')
+    # output.to_csv(outpath, index=False)
     
 def top_clinic_tokens(csv, num):
     """
@@ -229,13 +238,45 @@ def top_clinic_tokens(csv, num):
     Returns standardized dataframe of nlargest tokens by count 
     """
     # filter and sort
+    csv = "truth_inquery/temp_output/CPC_NM_clinics.csv"
     df = pd.read_csv(csv)
+
+    dfid = df[['url', 'urls_visited', 'index']]
+    df = df.drop(['url', 'urls_visited'], axis=1)
     df = df.transpose()
 
+    for col in df.columns[1:]:
+        str_key = 'count' + str(col)
+        sdf = df[[0,col]]
+        sdf.columns=sdf.iloc[0]
+        sdf = sdf.iloc[1:]
+        # sdf.drop
+        sdf = sdf.sort_values(by=[str_key], axis=1, ascending = False)
+
+        sdf = sdf.sort_values(by='index', axis=1, ascending = False)
+
+
+         # output = output[['count'][:150]]
+    # not this 
+    # output = output['count'][:150]
+    # output = output.iloc(0:100,axis=0]
+
+    # sort all columns
+    # df.sort_values(by=[1,2,3], axis=1, ascending=False)
     # node = df[~df['token'].str.contains('|'.join(TOKEN_IGNORE), na = False)]
     # node = node[['token', col]].sort_values(by=[col], ascending=False)
     # node = node.rename(columns = {col: 'Count'})
     # print("CSV saved")
+
+
+
+
+
+
+
+
+
+
 
 # def merge_data(clinics, links):
 #     df1 = pd.read_csv(clinics, low_me2mory=False)
@@ -259,46 +300,46 @@ def top_clinic_tokens(csv, num):
 # banned: Alabama Arkansas Idaho Kentucky Louisiana Mississippi Missouri 
 #         Oklahoma South Dakota Tennessee Texas West Virginia
 # stopped scheduling: North Dakota Wisconsin
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    # for state in STATES.keys():
-    #     clinics = "truth_inquery/temp/CPC_state_clinics.csv".replace("state", state)
-    #     links = "truth_inquery/temp/CPC_state_links.csv".replace("state", state)
-    #     try:
-    #         merge_data(clinics, links)
-    #     except:
-    #         continue
-        # out = clinics.replace("temp","temp_output")
-        # out.to_csv(index=False)
-    # for stabb, name in STATES2.items():
-    # for stabb in ["CA"]:
-        # Crawl CPC urls
-    #     try:
-    #         CPCinput = CPCIN + name + " (" + stabb + ").csv"
-    #         CPCoutput = CPCOUT.replace("state", stabb)
-    #         df = csv_extract(CPCinput)
-    #     except FileNotFoundError:
-    #         print(stabb, "file does not exist")
-    #         continue
+#     # for state in STATES.keys():
+#     #     clinics = "truth_inquery/temp/CPC_state_clinics.csv".replace("state", state)
+#     #     links = "truth_inquery/temp/CPC_state_links.csv".replace("state", state)
+#     #     try:
+#     #         merge_data(clinics, links)
+#     #     except:
+#     #         continue
+#         # out = clinics.replace("temp","temp_output")
+#         # out.to_csv(index=False)
+#     # for stabb, name in STATES2.items():
+#     # for stabb in ["CA"]:
+#         # Crawl CPC urls
+#     #     try:
+#     #         CPCinput = CPCIN + name + " (" + stabb + ").csv"
+#     #         CPCoutput = CPCOUT.replace("state", stabb)
+#     #         df = csv_extract(CPCinput)
+#     #     except FileNotFoundError:
+#     #         print(stabb, "file does not exist")
+#     #         continue
 
-    #     urls = df['url'].tolist()
+#     #     urls = df['url'].tolist()
 
-    #     print("Crawling CPCs in", stabb)
-    #     network_crawl(urls, CPCoutput, LIMIT)
+#     #     print("Crawling CPCs in", stabb)
+#     #     network_crawl(urls, CPCoutput, LIMIT)
 
-    for stabb, name in STATES2.items():
-        # Crawl HPC urls
-        HPCinput = HPCIN.replace("state", stabb)
-        HPCoutput = HPCOUT.replace("state", stabb)
+#     for stabb, name in STATES2.items():a
+#         # Crawl HPC urls
+#         HPCinput = HPCIN.replace("state", stabb)
+#         HPCoutput = HPCOUT.replace("state", stabb)
 
-        try: 
-            HPC = pd.read_csv(HPCinput)
-        except FileNotFoundError:
-            print(stabb, "file does not exist")
-            continue
-        HPC_urls = HPC['url'].to_list()
+#         try: 
+#             HPC = pd.read_csv(HPCinput)
+#         except FileNotFoundError:
+#             print(stabb, "file does not exist")
+#             continue
+#         HPC_urls = HPC['url'].to_list()
 
-        print("Crawling HPCs in", stabb)
-        network_crawl(HPC_urls, HPCoutput, LIMIT)
+#         print("Crawling HPCs in", stabb)
+#         network_crawl(HPC_urls, HPCoutput, LIMIT)
 
-        print(stabb,"CPCs and HPCs saved")
+#         print(stabb,"CPCs and HPCs saved")
