@@ -5,6 +5,7 @@ import re
 import scrapelib
 import time
 from collections import defaultdict
+import glob 
 
 s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
 
@@ -13,7 +14,7 @@ LIMIT = 25
 CPCIN = "truth_inquery/data/CPC_"
 CPCOUT = "truth_inquery/temp/CPC_state_clinics.csv"
 HPCIN = "truth_inquery/data/HPC_urls_state.csv"
-HPCOUT = "truth_inquery/temp_output/HPC_state_clinics.csv"
+HPCOUT = "truth_inquery/temp_output2/HPC_state_clinics.csv"
 
 PATTERN = r'[\[0-9()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
 
@@ -225,7 +226,8 @@ def network_crawl(urllst, outpath, limit=2):
 
     # output = pd.merge(clinic, res, left_on='index', right_on='index', how='outer')
     # output.to_csv(outpath, index=False)
-    
+
+# FUCK
 def top_clinic_tokens(csv, num):
     """
     Cleans token-count pandas dataframe for single URL (clinic)
@@ -238,23 +240,39 @@ def top_clinic_tokens(csv, num):
     Returns standardized dataframe of nlargest tokens by count 
     """
     # filter and sort
-    csv = "truth_inquery/temp_output/CPC_NM_clinics.csv"
+    newdf = pd.DataFrame()
     df = pd.read_csv(csv)
-
     dfid = df[['url', 'urls_visited', 'index']]
     df = df.drop(['url', 'urls_visited'], axis=1)
+
     df = df.transpose()
+    df.columns = df.iloc[0]
+    df = df.iloc[1:]
 
     for col in df.columns[1:]:
-        str_key = 'count' + str(col)
-        sdf = df[[0,col]]
-        sdf.columns=sdf.iloc[0]
-        sdf = sdf.iloc[1:]
-        # sdf.drop
-        sdf = sdf.sort_values(by=[str_key], axis=1, ascending = False)
+        sdf = df[['token',col]]
+        sdf[col] = sdf[col].astype(float)
+        sdf = sdf.sort_values(by=col, ascending = False)
+        sdf = sdf.iloc[0:num,]
+        sdf = sdf.reset_index()
+        sdf = sdf.drop('index', axis=1)
+        sdf['tuple'] = list(zip(sdf['token'], sdf[col]))
+        sdf = sdf.drop(['token',col], axis=1)
+        sdf = sdf.rename(columns={'tuple':col})
+        sdf = sdf.transpose()
+        newdf = pd.concat([newdf, sdf])
+    
+    output = pd.merge(dfid, newdf, left_on='index',right_on='index',how='outer')
+    output = output.iloc[1:]
+    output.to_csv(csv.replace('temp_output', 'temp_output2'))
 
-        sdf = sdf.sort_values(by='index', axis=1, ascending = False)
+        #     output = pd.merge(df1, df2, left_on='index', right_on='index', how='outer')
 
+
+        # sdf[col] = pd.to_numeric(sdf.loc[,col])
+        # Try using .loc[row_indexer,col_indexer] = value instead
+        # sdf = sdf.sort_values(by=[str_key], axis=0, ascending = False)
+        # sdf = sdf.sort_values(by='index', axis=1, ascending = False)
 
          # output = output[['count'][:150]]
     # not this 
@@ -268,15 +286,8 @@ def top_clinic_tokens(csv, num):
     # node = node.rename(columns = {col: 'Count'})
     # print("CSV saved")
 
-
-
-
-
-
-
-
-
-
+for csv in glob.glob('truth_inquery/temp_output/*'):
+    top_clinic_tokens(csv, 100)
 
 # def merge_data(clinics, links):
 #     df1 = pd.read_csv(clinics, low_me2mory=False)
