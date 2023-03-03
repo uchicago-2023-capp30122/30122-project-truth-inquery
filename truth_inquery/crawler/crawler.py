@@ -266,46 +266,8 @@ def top_clinic_tokens(csv, num):
     output = output.iloc[1:]
     output.to_csv(csv.replace('temp_output', 'temp_output2'))
 
-        #     output = pd.merge(df1, df2, left_on='index', right_on='index', how='outer')
-
-
-        # sdf[col] = pd.to_numeric(sdf.loc[,col])
-        # Try using .loc[row_indexer,col_indexer] = value instead
-        # sdf = sdf.sort_values(by=[str_key], axis=0, ascending = False)
-        # sdf = sdf.sort_values(by='index', axis=1, ascending = False)
-
-         # output = output[['count'][:150]]
-    # not this 
-    # output = output['count'][:150]
-    # output = output.iloc(0:100,axis=0]
-
-    # sort all columns
-    # df.sort_values(by=[1,2,3], axis=1, ascending=False)
-    # node = df[~df['token'].str.contains('|'.join(TOKEN_IGNORE), na = False)]
-    # node = node[['token', col]].sort_values(by=[col], ascending=False)
-    # node = node.rename(columns = {col: 'Count'})
-    # print("CSV saved")
-
 for csv in glob.glob('truth_inquery/temp_output/*'):
-    top_clinic_tokens(csv, 100)
-
-# def merge_data(clinics, links):
-#     df1 = pd.read_csv(clinics, low_me2mory=False)
-#     df2 = pd.read_csv(links, low_memory=False)
-
-#     df2['index'] = "count" +  df2['Unnamed: 0'].astype(str)
-#     df2 = df2.drop('Unnamed: 0', axis=1)
-
-#     output = pd.merge(df1, df2, left_on='index', right_on='index', how='outer')
-
-#     # output = pd.merge(df1, df2, how='outer')
-#     output = output.drop('Unnamed: 0', axis=1)
-#     output.insert(0, 'url', output.pop('url'))
-#     output.insert(1, 'urls_visited', output.pop('urls_visited'))
-
-#     output.to_csv(clinics.replace("temp","temp_output"), index=False)
-    # df2['index'] = "count" +  df2['index'].astype(str)
-
+    top_clinic_tokens(csv, 200)
 
 # States that are not crawled due to abortion restrictions
 # banned: Alabama Arkansas Idaho Kentucky Louisiana Mississippi Missouri 
