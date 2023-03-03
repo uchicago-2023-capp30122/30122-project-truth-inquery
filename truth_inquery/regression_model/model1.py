@@ -2,6 +2,7 @@ from sklearn import linear_model
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
 import pandas
 import sqlite3
 import json
@@ -104,7 +105,7 @@ print()
 
 cpchpcpolicy_df = pandas.merge(cpc_and_hpc_dataframe, policyapi_dataframe, on = "state", how = "inner")
 
-print()
+print("here is the joined dataframe for the regression")
 print(cpchpcpolicy_df)
 print()
 
@@ -116,32 +117,63 @@ print()
 
 x_df = cpchpcpolicy_df[["waiting_period_hours", "counseling_visits", "banned_after_weeks_since_LMP"]]
 
-print()
-print(x_df)
-print()
+print("this is the x dataframe")
+print(x_df.iloc[200:250])
+print(x_df.shape)
 
 # Step 10: select all outcome variables, in this case (is_cpc) into a single dataframe y
 
 y_df = cpchpcpolicy_df[["IV"]]
+print(y_df)
+print(x_df.shape)
+print(y_df.shape)
 
 # Step 11: Split the finalized flattened and joined combined_and_joined_clinic_dataframe into train and test subsets using sklearn
 
 X_train, X_test, y_train, y_test = train_test_split(x_df, y_df, test_size=0.2, random_state=25)
 
+print("shape check")
+print(X_train.shape)
+
+# print(X_test.shape)
+# print(y_train.shape)
+# print(y_test.shape)
+
 reg = LinearRegression().fit(X_train, y_train)
 
-y_pred = reg.predict(X_test)
-mean_squared_error(y_test, y_pred)
+# logistic regression may be better suited
+
+y_pred = reg.predict(X_train)
+# mean_squared_error(y_train, y_pred)
+print("LOOK AT THIS")
+print(X_train.shape)
+print(y_pred.shape)
+
+y_pred_test = reg.predict(X_test)
+
+
+
+print(y_pred.shape)
 
 # The coefficients
 print("Coefficients: \n", reg.coef_)
 
 # The mean squared error
-print("Mean squared error: %.2f" % mean_squared_error(y_test, y_pred))
+# print("Mean squared error: %.2f" % mean_squared_error(y_test, y_pred))
 
 
 # The coefficient of determination: 1 is perfect prediction
-print("Coefficient of determination: %.2f" % r2_score(y_test, y_pred))
+# print("Coefficient of determination: %.2f" % r2_score(y_test, y_pred))
+
+# plot 
+
+plt.scatter(X_train["waiting_period_hours"], y_train)
+plt.plot(X_train["waiting_period_hours"], y_pred, color="red")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.savefig("/home/mattryan/programmingturk/FinalProject/truth_inquery/regression_model/plot.png")
+plt.show()
+
 
 
 # Step 12: build the regression model from the training subset
