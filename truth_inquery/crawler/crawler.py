@@ -21,7 +21,7 @@ PATTERN = r'[\[0-9()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
 # source: https://gist.github.com/rogerallen/1583593
 STATES = {
     'AK': 'Alaska', 'AL': 'Alabama', 'AR': 'Arkansas', 'AZ': 'Arizona', 'CA': 'California',
-    'CO': 'Colorado', 'CT': 'Connecticut', 'DC': 'District of Columbia', 'DE': 'Delaware',
+    'CO': 'Colorado', 'CT': 'Connecticwut', 'DC': 'District of Columbia', 'DE': 'Delaware',
     'FL': 'Florida', 'GA': 'Georgia', 'HI': 'Hawaii', 'IA': 'Iowa', 'ID': 'Idaho',
     'IL': 'Illinois', 'IN': 'Indiana', 'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana',
     'MA': 'Massachusetts', 'MD': 'Maryland', 'ME': 'Maine', 'MI': 'Michigan', 'MN': 'Minnesota',
@@ -57,9 +57,9 @@ def clean_df(df, n=""):
     output['count'] = output.sum(axis=1)
     output = output[['count']]
 
-    output['count'] = output.sum(numeric_only=True, axis=1)
-    output = output[['token', 'count']]
-    output = output.sort_values(by=['count'], axis=0, ascending = False)
+    # output['count'] = output.sum(numeric_only=True, axis=1)
+    # output = output[['token', 'count']]/
+    # output = output.sort_values(by=['count'], axis=0, ascending = False)
     # output = output[['count'][:150]]
     # not this 
     # output = output['count'][:150]
@@ -210,11 +210,11 @@ def network_crawl(urllst, outpath, limit=2):
     # Clinic/URL-level data
     clinic = df.reset_index()
     clinic = clinic.rename({'index':'token'}, axis=1)
-    # clinic = clinic.transpose()
-    # clinic = clinic.reset_index()
+    clinic = clinic.transpose()
+    clinic = clinic.reset_index()
 
-    return clinic
-    # clinic.to_csv(outpath)
+    # return clinic
+    clinic.to_csv(outpath)
 
     # # # Xwalk
     # res = pd.DataFrame(results)
@@ -227,92 +227,82 @@ def network_crawl(urllst, outpath, limit=2):
     # output = pd.merge(clinic, res, left_on='index', right_on='index', how='outer')
     # output.to_csv(outpath, index=False)
 
-# FUCK
-def top_clinic_tokens(csv, num):
-    """
-    Cleans token-count pandas dataframe for single URL (clinic)
 
-    Inputs
-        - df: (pd dataframe) dataframe as token-count columns (2)
-        - col (string): column with token counts of URL
-        - top_num (int): number of top tokens to return
+# def top_clinic_tokens(csv, num):
+#     """
+#     Cleans token-count pandas dataframe for single URL (clinic)
 
-    Returns standardized dataframe of nlargest tokens by count 
-    """
-    # filter and sort
-    newdf = pd.DataFrame()
-    df = pd.read_csv(csv)
-    dfid = df[['url', 'urls_visited', 'index']]
-    df = df.drop(['url', 'urls_visited'], axis=1)
+#     Inputs
+#         - df: (pd dataframe) dataframe as token-count columns (2)
+#         - col (string): column with token counts of URL
+#         - top_num (int): number of top tokens to return
 
-    df = df.transpose()
-    df.columns = df.iloc[0]
-    df = df.iloc[1:]
+#     Returns standardized dataframe of nlargest tokens by count 
+#     """
+#     # filter and sort
+#     newdf = pd.DataFrame()
+#     df = pd.read_csv(csv)
+#     dfid = df[['url', 'urls_visited', 'index']]
+#     df = df.drop(['url', 'urls_visited'], axis=1)
 
-    for col in df.columns[1:]:
-        sdf = df[['token',col]]
-        sdf[col] = sdf[col].astype(float)
-        sdf = sdf.sort_values(by=col, ascending = False)
-        sdf = sdf.iloc[0:num,]
-        sdf = sdf.reset_index()
-        sdf = sdf.drop('index', axis=1)
-        sdf['tuple'] = list(zip(sdf['token'], sdf[col]))
-        sdf = sdf.drop(['token',col], axis=1)
-        sdf = sdf.rename(columns={'tuple':col})
-        sdf = sdf.transpose()
-        newdf = pd.concat([newdf, sdf])
+#     df = df.transpose()
+#     df.columns = df.iloc[0]
+#     df = df.iloc[1:]
+
+#     for col in df.columns[1:]:
+#         sdf = df[['token',col]]
+#         sdf[col] = sdf[col].astype(float)
+#         sdf = sdf.sort_values(by=col, ascending = False)
+#         sdf = sdf.iloc[0:num,]
+#         sdf = sdf.reset_index()
+#         sdf = sdf.drop('index', axis=1)
+#         sdf['tuple'] = list(zip(sdf['token'], sdf[col]))
+#         sdf = sdf.drop(['token',col], axis=1)
+#         sdf = sdf.rename(columns={'tuple':col})
+#         sdf = sdf.transpose()
+#         newdf = pd.concat([newdf, sdf])
     
-    output = pd.merge(dfid, newdf, left_on='index',right_on='index',how='outer')
-    output = output.iloc[1:]
-    output.to_csv(csv.replace('temp_output', 'temp_output2'))
+#     output = pd.merge(dfid, newdf, left_on='index',right_on='index',how='outer')
+#     output = output.iloc[1:]
+#     output.to_csv(csv.replace('temp_output', 'temp_output2'))
 
-for csv in glob.glob('truth_inquery/temp_output/*'):
-    top_clinic_tokens(csv, 200)
+# for csv in glob.glob('truth_inquery/temp_output/*'):
+#     top_clinic_tokens(csv, 200)
 
 # States that are not crawled due to abortion restrictions
 # banned: Alabama Arkansas Idaho Kentucky Louisiana Mississippi Missouri 
 #         Oklahoma South Dakota Tennessee Texas West Virginia
 # stopped scheduling: North Dakota Wisconsin
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
-#     # for state in STATES.keys():
-#     #     clinics = "truth_inquery/temp/CPC_state_clinics.csv".replace("state", state)
-#     #     links = "truth_inquery/temp/CPC_state_links.csv".replace("state", state)
-#     #     try:
-#     #         merge_data(clinics, links)
-#     #     except:
-#     #         continue
-#         # out = clinics.replace("temp","temp_output")
-#         # out.to_csv(index=False)
-#     # for stabb, name in STATES2.items():
-#     # for stabb in ["CA"]:
-#         # Crawl CPC urls
-#     #     try:
-#     #         CPCinput = CPCIN + name + " (" + stabb + ").csv"
-#     #         CPCoutput = CPCOUT.replace("state", stabb)
-#     #         df = csv_extract(CPCinput)
-#     #     except FileNotFoundError:
-#     #         print(stabb, "file does not exist")
-#     #         continue
+    # for stabb, name in STATES.items():
+    for stabb, name in ('ND', 'North Dakota'):
+        # Crawl CPC urls
+        try:
+            CPCinput = CPCIN + name + " (" + stabb + ").csv"
+            CPCoutput = CPCOUT.replace("state", stabb)
+            df = csv_extract(CPCinput)
+        except FileNotFoundError:
+            print(stabb, "file does not exist")
+            continue
 
-#     #     urls = df['url'].tolist()
+        urls = df['url'].tolist()
 
-#     #     print("Crawling CPCs in", stabb)
-#     #     network_crawl(urls, CPCoutput, LIMIT)
+        print("Crawling CPCs in", stabb)
+        network_crawl(urls, CPCoutput, LIMIT)
 
-#     for stabb, name in STATES2.items():a
-#         # Crawl HPC urls
-#         HPCinput = HPCIN.replace("state", stabb)
-#         HPCoutput = HPCOUT.replace("state", stabb)
+        # Crawl HPC urls
+        HPCinput = HPCIN.replace("state", stabb)
+        HPCoutput = HPCOUT.replace("state", stabb)
 
-#         try: 
-#             HPC = pd.read_csv(HPCinput)
-#         except FileNotFoundError:
-#             print(stabb, "file does not exist")
-#             continue
-#         HPC_urls = HPC['url'].to_list()
+        try: 
+            HPC = pd.read_csv(HPCinput)
+        except FileNotFoundError:
+            print(stabb, "file does not exist")
+            continue
+        HPC_urls = HPC['url'].to_list()
 
-#         print("Crawling HPCs in", stabb)
-#         network_crawl(HPC_urls, HPCoutput, LIMIT)
+        print("Crawling HPCs in", stabb)
+        network_crawl(HPC_urls, HPCoutput, LIMIT)
 
-#         print(stabb,"CPCs and HPCs saved")
+        print(stabb,"CPCs and HPCs saved")
