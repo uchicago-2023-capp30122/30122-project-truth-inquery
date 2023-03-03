@@ -5,7 +5,6 @@ import re
 import scrapelib
 import time
 from collections import defaultdict
-import glob 
 
 s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
 
@@ -51,8 +50,11 @@ INDEX_IGNORE = (
 
 def clean_df(df):
     """
-    Clean pd dataframe. replace NaN with 0.
-    collapse columns into single column by summing token count Total
+    Takes in pandas dataframe, replace NaN with 0 and 
+    generate new column sum 'count' across all columns
+
+    Input: pandas dataframe
+    Returns token,count pandas dataframe
     """
     output = df.fillna(0)
     output['count'] = output.sum(axis=1)
@@ -61,8 +63,8 @@ def clean_df(df):
 
 def csv_extract(input_file):
     """
-    Loads .csv input file and extracts 'Website'
-    column to convert to list of urls to iterate over
+    Loads CPC csv input file and extracts 'Website'
+    column to convert to list of urls
 
     Inputs:
         input_file (str): File path to .csv file
@@ -73,6 +75,7 @@ def csv_extract(input_file):
     df = f[f['Website'].notna()]
     df = df[['Name ', 'Zip Code', 'State', 'Website']]
 
+    # Rename columns, front-fill zipcode with zeros.
     df = df.rename(columns={'Name ':'name', 'Zip Code':'zip', 'State':'state', 'Website':'url'})
     df['zip'] = df['zip'].astype(str)
     df['zip'] = df['zip'].str.zfill(5)
@@ -102,16 +105,16 @@ def tokenize(root):
 
     Inputs:
         HTML 'Root' element from a website from which text is scraped
-    
+
     Returns: dictionary of token-frequency key-values pairs.
     """
     tokens = defaultdict(int)
     pattern = re.compile(PATTERN)
 
-    # Spend a maximum of 5 minutes tokenizing text
+    # Spend a maximum of 5 minutes tokenizing a url
     timeout = time.time() + 60*5
     all_text = ''.join(root.itertext())
-    
+
     for key in all_text.split():
         str_key = str(key).lower()
 
@@ -130,13 +133,15 @@ def tokenize(root):
 
 def crawl(url, limit):
     """
-    Crawls the URLs linked to the base url (input) up to the limit # of urls.
+    Crawls the adjacent HREFs of the input URL up to the limit number.
 
     Inputs
-        - base url (str): url
-        - limit (int) number of urls to be scraped
+        - url: (str) url
+        - limit: (int) number of adjacent urls to crawl
 
-    Returns pandas dataframe out of tokenized network of URLs
+    Returns:
+        - df: pandas dataframe with a column of token counts for each adj. URL
+        - urls_visited 
     """
     dct = defaultdict(dict)
     urls_visited = 1
@@ -145,11 +150,11 @@ def crawl(url, limit):
     if root is None:
         return None
 
-    # Tokenize the base URL (input)
+    # Tokenize the base URL (input) and identify unique sub-urls
     dct['base'] = tokenize(root)
     urls = set(root.xpath('//a/@href'))
 
-    # Tokenize up to limit # sub-URLs
+    # Tokenize up to limit # sub-URLs creating a new column for each
     for u in urls:
         subroot = get_root(u)
         if subroot is not None:
@@ -159,33 +164,38 @@ def crawl(url, limit):
         if urls_visited == limit:
             break
 
+    # Return df and number of urls visited including base
     df = pd.DataFrame(dct)
     return df, urls_visited
 
-def network_crawl(urllst, outpath, limit=5):
+def network_crawl(urllst, outpath, limit=LIMIT):
     """
-    Takes in URL list as list of base urls and crawls up to 
-    the limit # of adjacent URLs (one click away)
+    Crawls each URL in list and up to the limit number of adjacent HREFs.
 
-    Writes data to CSV
+    Creates tokenized results dataframe and corresponding xwalk to
+    re-link URLs to corresponding tokens
 
     Inputs
-        - urllst (list of strings): URLs to loop through
-        - limit (int): maximum number of links to be scraped for each
-                        base url
+        - urllst: (list of strings) URLs 
+        - outpath: (str) file path to save cleaned CSV passed to helper
+        - limit: (int) max num of hrefs to crawl for each URL
 
-    Returns: None, creates csv file
+    Returns: None, passes dataframe output to helper
     """
+    # Accumulators 
     df = pd.DataFrame()
     results = defaultdict(dict)
 
+    # Crawl each URL
     for b, b_url in enumerate(urllst):
 
         print("Base URL", b, "crawling")
         crawldf = crawl(b_url, limit)
+        # If root is none skip
         if crawldf is None:
             continue
-
+        
+        # Unpack output of crawl and add to data accumulators
         nextdf, urls_visited = crawldf
 
         # Join df and new_df
@@ -195,7 +205,7 @@ def network_crawl(urllst, outpath, limit=5):
         results[b+1] = {'url': b_url, 'urls_visited': urls_visited}
         print("Finished")
 
-    # Prep URL-level data and results for merge
+    # Prep URL-level data and results by generating common merge index
     # Clinic/URL-level data
     clinic = df.reset_index()
     clinic = clinic.rename({'index':'token'}, axis=1)
@@ -206,57 +216,66 @@ def network_crawl(urllst, outpath, limit=5):
     res = pd.DataFrame(results)
     res = res.transpose()
     res = res.reset_index()
+    # Key for merge
     res['index'] = "count" +  res['index'].astype(str)
-    
+
+    # save url-level csv containing top tokens 
     top_clinic_tokens(clinic, res, outpath)
+
 
 def top_clinic_tokens(df, df_ids, outpath, num=200):
     """
-    Cleans token-count pandas dataframe for single URL (clinic)
+    Cleans input token df to merge with df_ids and saves csv with
+    top num tokens.
 
     Inputs
-        - df: (pd dataframe) dataframe as token-count columns (2)
-        - col (string): column with token counts of URL
-        - top_num (int): number of top tokens to return
+        - df: (pd dataframe) token counts for each URL
+        - df_id: (pd df) xwalk with URL and num urls visited 
+        - output: (str) outpath for csv
+        - num: (int) number of top tokens to include
 
-    Returns standardized dataframe of nlargest tokens by count 
+    Returns: None, writes standardized dataframe of nlargest tokens to csv
     """
-    # filter and sort
+    # Accumulate top num tokens in newdf
     newdf = pd.DataFrame()
     df = df.transpose()
     df.columns = df.iloc[0]
     df = df.iloc[1:]
 
+    # Loop over columns and generate (token,count) tuple
     for col in df.columns[1:]:
+
+        # Single (column) df 'sdf'
         sdf = df[['token',col]]
+        # Sort descending by token count and select first num rows
         sdf[col] = sdf[col].astype(float)
         sdf = sdf.sort_values(by=col, ascending = False)
         sdf = sdf.iloc[0:num,]
 
-
         sdf = sdf.reset_index()
         sdf = sdf.drop('index', axis=1)
 
+        # Generate tuple row and replace original col with tuples
         sdf['tuple'] = list(zip(sdf['token'], sdf[col]))
         sdf = sdf.drop(['token',col], axis=1)
         sdf = sdf.rename(columns={'tuple':col})
         sdf = sdf.transpose()
+
+        # Add single row (URL) with top num token tuples as columns
         newdf = pd.concat([newdf, sdf])
     
+    # Merge tokens with xwalk on count`num` identifier
     output = pd.merge(df_ids, newdf, left_on='index',right_on='index',how='outer')
     output.to_csv(outpath)
-
-# for csv in glob.glob('truth_inquery/temp_output/*'):
-#     top_clinic_tokens(csv, 200)
 
 # States that are not crawled due to abortion restrictions
 # banned: Alabama Arkansas Idaho Kentucky Louisiana Mississippi Missouri 
 #         Oklahoma South Dakota Tennessee Texas West Virginia
 # stopped scheduling: North Dakota Wisconsin
+# This takes all input data for each state CPCs and HPCs and tokenizes URLs into CSVs
 if __name__ == "__main__":
 
     for stabb, name in STATES.items():
-    # for stabb, name in {'AK': 'Alaska'}.items():
         # Crawl CPC urls
         try:
             CPCinput = CPCIN + name + " (" + stabb + ").csv"
