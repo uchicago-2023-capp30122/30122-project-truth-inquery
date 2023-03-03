@@ -1,5 +1,6 @@
 *.pyc
 *.xlsx
+*.do
 .DS_Store
 .pytest_cache
 .vscode
