@@ -9,12 +9,13 @@ import glob
 
 s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
 
-
 LIMIT = 25
+
 CPCIN = "truth_inquery/data/CPC_"
-CPCOUT = "truth_inquery/temp/CPC_state_clinics.csv"
+CPCOUT = "truth_inquery/output/CPC_state_clinics.csv"
+
 HPCIN = "truth_inquery/data/HPC_urls_state.csv"
-HPCOUT = "truth_inquery/temp_output2/HPC_state_clinics.csv"
+HPCOUT = "truth_inquery/output/HPC_state_clinics.csv"
 
 PATTERN = r'[\[0-9()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
 
@@ -48,7 +49,7 @@ INDEX_IGNORE = (
     "with"
 )
 
-def clean_df(df, n=""):
+def clean_df(df):
     """
     Clean pd dataframe. replace NaN with 0.
     collapse columns into single column by summing token count Total
@@ -56,17 +57,6 @@ def clean_df(df, n=""):
     output = df.fillna(0)
     output['count'] = output.sum(axis=1)
     output = output[['count']]
-
-    # output['count'] = output.sum(numeric_only=True, axis=1)
-    # output = output[['token', 'count']]/
-    # output = output.sort_values(by=['count'], axis=0, ascending = False)
-    # output = output[['count'][:150]]
-    # not this 
-    # output = output['count'][:150]
-    # output = output.iloc(0:100,axis=0]
-
-    # Keep top X
-
     return output
 
 def csv_extract(input_file):
@@ -121,7 +111,7 @@ def tokenize(root):
     # Spend a maximum of 5 minutes tokenizing text
     timeout = time.time() + 60*5
     all_text = ''.join(root.itertext())
-
+    
     for key in all_text.split():
         str_key = str(key).lower()
 
@@ -172,7 +162,7 @@ def crawl(url, limit):
     df = pd.DataFrame(dct)
     return df, urls_visited
 
-def network_crawl(urllst, outpath, limit=2):
+def network_crawl(urllst, outpath, limit=5):
     """
     Takes in URL list as list of base urls and crawls up to 
     the limit # of adjacent URLs (one click away)
@@ -205,7 +195,6 @@ def network_crawl(urllst, outpath, limit=2):
         results[b+1] = {'url': b_url, 'urls_visited': urls_visited}
         print("Finished")
 
-
     # Prep URL-level data and results for merge
     # Clinic/URL-level data
     clinic = df.reset_index()
@@ -213,58 +202,49 @@ def network_crawl(urllst, outpath, limit=2):
     clinic = clinic.transpose()
     clinic = clinic.reset_index()
 
-    # return clinic
-    clinic.to_csv(outpath)
-
-    # # # Xwalk
-    # res = pd.DataFrame(results)
-    # res = res.transpose()
-    # res = res.reset_index()
-    # res['index'] = "count" +  res['index'].astype(str)
+    # Xwalk
+    res = pd.DataFrame(results)
+    res = res.transpose()
+    res = res.reset_index()
+    res['index'] = "count" +  res['index'].astype(str)
     
-    # # res.to_csv(outpath.replace("_clinics", "_links"))
+    top_clinic_tokens(clinic, res, outpath)
 
-    # output = pd.merge(clinic, res, left_on='index', right_on='index', how='outer')
-    # output.to_csv(outpath, index=False)
+def top_clinic_tokens(df, df_ids, outpath, num=200):
+    """
+    Cleans token-count pandas dataframe for single URL (clinic)
+
+    Inputs
+        - df: (pd dataframe) dataframe as token-count columns (2)
+        - col (string): column with token counts of URL
+        - top_num (int): number of top tokens to return
+
+    Returns standardized dataframe of nlargest tokens by count 
+    """
+    # filter and sort
+    newdf = pd.DataFrame()
+    df = df.transpose()
+    df.columns = df.iloc[0]
+    df = df.iloc[1:]
+
+    for col in df.columns[1:]:
+        sdf = df[['token',col]]
+        sdf[col] = sdf[col].astype(float)
+        sdf = sdf.sort_values(by=col, ascending = False)
+        sdf = sdf.iloc[0:num,]
 
 
-# def top_clinic_tokens(csv, num):
-#     """
-#     Cleans token-count pandas dataframe for single URL (clinic)
+        sdf = sdf.reset_index()
+        sdf = sdf.drop('index', axis=1)
 
-#     Inputs
-#         - df: (pd dataframe) dataframe as token-count columns (2)
-#         - col (string): column with token counts of URL
-#         - top_num (int): number of top tokens to return
-
-#     Returns standardized dataframe of nlargest tokens by count 
-#     """
-#     # filter and sort
-#     newdf = pd.DataFrame()
-#     df = pd.read_csv(csv)
-#     dfid = df[['url', 'urls_visited', 'index']]
-#     df = df.drop(['url', 'urls_visited'], axis=1)
-
-#     df = df.transpose()
-#     df.columns = df.iloc[0]
-#     df = df.iloc[1:]
-
-#     for col in df.columns[1:]:
-#         sdf = df[['token',col]]
-#         sdf[col] = sdf[col].astype(float)
-#         sdf = sdf.sort_values(by=col, ascending = False)
-#         sdf = sdf.iloc[0:num,]
-#         sdf = sdf.reset_index()
-#         sdf = sdf.drop('index', axis=1)
-#         sdf['tuple'] = list(zip(sdf['token'], sdf[col]))
-#         sdf = sdf.drop(['token',col], axis=1)
-#         sdf = sdf.rename(columns={'tuple':col})
-#         sdf = sdf.transpose()
-#         newdf = pd.concat([newdf, sdf])
+        sdf['tuple'] = list(zip(sdf['token'], sdf[col]))
+        sdf = sdf.drop(['token',col], axis=1)
+        sdf = sdf.rename(columns={'tuple':col})
+        sdf = sdf.transpose()
+        newdf = pd.concat([newdf, sdf])
     
-#     output = pd.merge(dfid, newdf, left_on='index',right_on='index',how='outer')
-#     output = output.iloc[1:]
-#     output.to_csv(csv.replace('temp_output', 'temp_output2'))
+    output = pd.merge(df_ids, newdf, left_on='index',right_on='index',how='outer')
+    output.to_csv(outpath)
 
 # for csv in glob.glob('truth_inquery/temp_output/*'):
 #     top_clinic_tokens(csv, 200)
@@ -275,8 +255,8 @@ def network_crawl(urllst, outpath, limit=2):
 # stopped scheduling: North Dakota Wisconsin
 if __name__ == "__main__":
 
-    # for stabb, name in STATES.items():
-    for stabb, name in ('ND', 'North Dakota'):
+    for stabb, name in STATES.items():
+    # for stabb, name in {'AK': 'Alaska'}.items():
         # Crawl CPC urls
         try:
             CPCinput = CPCIN + name + " (" + stabb + ").csv"
@@ -286,9 +266,9 @@ if __name__ == "__main__":
             print(stabb, "file does not exist")
             continue
 
-        urls = df['url'].tolist()
+        urls = df['url'].tolist()[0:6]
 
-        print("Crawling CPCs in", stabb)
+        # print("Crawling CPCs in", stabb)
         network_crawl(urls, CPCoutput, LIMIT)
 
         # Crawl HPC urls
@@ -300,6 +280,7 @@ if __name__ == "__main__":
         except FileNotFoundError:
             print(stabb, "file does not exist")
             continue
+
         HPC_urls = HPC['url'].to_list()
 
         print("Crawling HPCs in", stabb)
