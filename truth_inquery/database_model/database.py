@@ -1,16 +1,13 @@
-#poetry run python database.py 
-#run from database_model directoy
+#poetry run python database_model/database.py
 import glob
 import re
 import os
 import pandas as pd
 import sqlite3
 
-
-path1 = "../database_model" 
+path1 = "../database_model" #API path truth_inquery/database_model/gestational_limits.csv
 path2 = "../output" 
 path3 = "../data" 
-
 
 def concat_files(): 
     """

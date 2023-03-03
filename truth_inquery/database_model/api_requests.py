@@ -1,11 +1,12 @@
-#poetry run python api_requests.py
-#run from database_model directoy
+#poetry run python database_model/api_requests.py
+import os
 import requests
 import json
 import pandas as pd
 from urllib.parse import urlparse
 
-apikey = '#################'
+apikey = '##########'
+dir_path = "../truth_inquery/database_model" 
 
 def make_link_absolute(rel_url, current_url):
     """
@@ -63,6 +64,7 @@ def api_calls():
             json.dump(a, outfile)
     return files
 
+
 def convert_json_csv():
     """
     Calls the api_calls function to generate a list of json file names and 
@@ -70,11 +72,12 @@ def convert_json_csv():
     Returns:
         A csv file for each json file and stored in the current directory.
     """
+    dir_path = "../truth_inquery/database_model" 
     files = api_calls()
     for file in files:
         with open(file, encoding = 'utf-8') as inputfile:
             df = pd.read_json(inputfile)
-        df.to_csv(f"{file[:len(file)-5]}.csv", encoding = 'utf-8', index = False)
+            filepath = os.path.join(dir_path, f"{file[:len(file)-5]}.csv")
+            df.to_csv(filepath, encoding = 'utf-8', index = True)
 
-convert_json_csv()
- 
+convert_json_csv() 
