@@ -67,6 +67,7 @@ def api_calls():
         files.append(filepath)
         with open(filepath, "w", encoding = 'utf-8') as outfile:
             json.dump(a, outfile)
+    print("API json files created and stored in database_model")
     return files
 
 
@@ -75,7 +76,8 @@ def convert_json_csv():
     Calls the api_calls function to generate a list of json file names and 
     converts the json files to csv format.
     Returns:
-        A csv file for each json file and stored in the current directory.
+        A csv file for each json file and stored in the current (database_model) 
+        subdirectory.
     """
     files = api_calls()
     for file in files:
@@ -83,6 +85,8 @@ def convert_json_csv():
             df = pd.read_json(inputfile)
             filepath = f"{file[:len(file)-5]}.csv"
             df.to_csv(filepath, encoding = 'utf-8', index = True)
+    print("API json files converted to CSV files and stored in database_model")
+
 
 
 convert_json_csv() 
