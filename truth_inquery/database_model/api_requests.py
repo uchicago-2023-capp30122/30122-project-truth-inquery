@@ -1,3 +1,4 @@
+#Dema Therese
 #poetry run python database_model/api_requests.py
 import config
 import os
@@ -79,5 +80,6 @@ def convert_json_csv():
             df = pd.read_json(inputfile)
             filepath = os.path.join(dir_path, f"{file[:len(file)-5]}.csv")
             df.to_csv(filepath, encoding = 'utf-8', index = True)
+
 
 convert_json_csv() 
