@@ -1,5 +1,7 @@
 #Dema Therese
-#poetry run python database_model/api_requests.py
+#Retrieves data using GET requests from https://www.abortionpolicyapi.com and 
+#converts the json files to csv files 
+
 import config
 import os
 import requests
@@ -9,10 +11,15 @@ from urllib.parse import urlparse
 
 dir_path = "../truth_inquery/database_model" 
 
+relative_urls = ["/v1/gestational_limits/states/", 
+                "/v1/insurance_coverage/states/", 
+                "/v1/minors/states/", 
+                "/v1/waiting_periods/states/"]
+
 def make_link_absolute(rel_url, current_url):
     """
     Combines a relative and complete url
-    Parameters:
+    Input:
         rel_url:      
         a URL or fragment
         current_url:  
@@ -33,10 +40,6 @@ def list_urls():
     Returns a list of full URLs/queries of different data tables from 
     https://www.abortionpolicyapi.com to run the function "api_calls()".
     """
-    relative_urls = ["/v1/gestational_limits/states/", 
-                    "/v1/insurance_coverage/states/", 
-                    "/v1/minors/states/", 
-                    "/v1/waiting_periods/states/"]
     current_url = "http://api.abortionpolicyapi.com"
     urls = []
     for rel_url in relative_urls:
@@ -59,9 +62,10 @@ def api_calls():
         url_parts = url.split('/')
         r = requests.get(url, headers=headers)
         a = r.json()
-        fileName = f"{url_parts[4]}.json"
-        files.append(fileName)
-        with open(fileName, "w", encoding = 'utf-8') as outfile:
+        fileName = f"{url_parts[4]}" 
+        filepath = os.path.join(dir_path, fileName + ".json")
+        files.append(filepath)
+        with open(filepath, "w", encoding = 'utf-8') as outfile:
             json.dump(a, outfile)
     return files
 
@@ -73,12 +77,11 @@ def convert_json_csv():
     Returns:
         A csv file for each json file and stored in the current directory.
     """
-    dir_path = "../truth_inquery/database_model" 
     files = api_calls()
     for file in files:
         with open(file, encoding = 'utf-8') as inputfile:
             df = pd.read_json(inputfile)
-            filepath = os.path.join(dir_path, f"{file[:len(file)-5]}.csv")
+            filepath = f"{file[:len(file)-5]}.csv"
             df.to_csv(filepath, encoding = 'utf-8', index = True)
 
 
