@@ -1,16 +1,22 @@
 #Dema Therese
-#poetry run python database_model/database.py
+#Creates five databases:
+# 1. api.db - API data sourced from https://www.abortionpolicyapi.com
+# 2. CPC_clinics.db - CPC clinic data coded and saved by Aaron Haefner in data subdirectory
+# 3. HPC_clinics.db - HPC clinic crawled by Aaron Haefner and saved in data subdirectory
+# 4. Tokens_CPC_clinics.db - Token files created by Aaron Haefner for CPCs statewise
+# 5. Tokens_HPC_clinics.db - Token files created by Aaron Haefner for HPCs statewise
+
 import glob
 import re
 import os
 import pandas as pd
 import sqlite3
 
-path1 = "../database_model" #API path truth_inquery/database_model/gestational_limits.csv
-path2 = "../output" 
-path3 = "../data" 
+path1 = "../truth_inquery/database_model"
+path2 = "../truth_inquery/output" 
+path3 = "../truth_inquery/data" 
 
-def concat_files(): 
+def api_db(): 
     """
     A function to assist in API source database creation by first concatenating 
     all the csv format files in a given path and then converting it to a dataframe
@@ -28,7 +34,7 @@ def concat_files():
     return conn.close()
 
 
-def concat_clinic_files(type, title): 
+def concat_clinic_db(type, title): 
     """
     A function to assist in clinic level database creation by 
     converting all the csv format files in a given path to a dataframe
@@ -84,13 +90,17 @@ def token_related_db(type, title):
 
 # Implements/calls the respective functions for API, CPC and HPC to convert them to 
 # sqlite3 databases
-concat_files()
+if __name__ == "__main__":
+    api_db()
+    print("api database created")
 
-concat_clinic_files("CPC", "CPC_clinics")
-concat_clinic_files("HPC", "HPC_clinics")
+    concat_clinic_db("CPC", "CPC_clinics")
+    concat_clinic_db("HPC", "HPC_clinics")
+    print("CPC_clinics and HPC_clinics databases created")
 
-token_related_db("CPC", "Tokens_CPC_clinics")
-token_related_db("HPC", "Tokens_HPC_clinics")
+    token_related_db("CPC", "Tokens_CPC_clinics")
+    token_related_db("HPC", "Tokens_HPC_clinics")
+    print("Tokens_CPC_clinics and Tokens_HPC_clinics databases created")
 
 
 
