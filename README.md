@@ -1,5 +1,9 @@
 # Project Truth InQuery
 
+to run the project with one line, run:
+
+poetry run python truth_inquery/
+
 ## Data Sources
 ### Abortion Policy API
 
