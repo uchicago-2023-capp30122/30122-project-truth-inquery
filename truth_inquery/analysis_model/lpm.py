@@ -5,8 +5,63 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 import pandas
-from analysis_model.dataframe_cleaner import *
+from truth_inquery.analysis_model.dataframe_cleaner import *
+# from analysis_model.dataframe_cleaner import *
+# import states
 
+STATES = {
+    'AK': 'Alaska',
+    'AL': 'Alabama',
+    'AR': 'Arkansas',
+    'AZ': 'Arizona',
+    'CA': 'California',
+    'CO': 'Colorado',
+    'CT': 'Connecticut',
+    'DC': 'District of Columbia',
+    'DE': 'Delaware',
+    'FL': 'Florida',
+    'GA': 'Georgia',
+    'HI': 'Hawaii',
+    'IA': 'Iowa',
+    'ID': 'Idaho',
+    'IL': 'Illinois',
+    'IN': 'Indiana',
+    'KS': 'Kansas',
+    'KY': 'Kentucky',
+    'LA': 'Louisiana',
+    'MA': 'Massachusetts',
+    'MD': 'Maryland',
+    'ME': 'Maine',
+    'MI': 'Michigan',
+    'MN': 'Minnesota',
+    'MO': 'Missouri',
+    'MS': 'Mississippi',
+    'MT': 'Montana',
+    'NC': 'North Carolina',
+    'ND': 'North Dakota',
+    'NE': 'Nebraska',
+    'NH': 'New Hampshire',
+    'NJ': 'New Jersey',
+    'NM': 'New Mexico',
+    'NV': 'Nevada',
+    'NY': 'New York',
+    'OH': 'Ohio',
+    'OK': 'Oklahoma',
+    'OR': 'Oregon',
+    'PA': 'Pennsylvania',
+    'RI': 'Rhode Island',
+    'SC': 'South Carolina',
+    'SD': 'South Dakota',
+    'TN': 'Tennessee',
+    'TX': 'Texas',
+    'UT': 'Utah',
+    'VA': 'Virginia',
+    'VT': 'Vermont',
+    'WA': 'Washington',
+    'WI': 'Wisconsin',
+    'WV': 'West Virginia',
+    'WY': 'Wyoming'
+}
 
 def analyze():
 
@@ -20,9 +75,24 @@ def analyze():
 
     clinic_and_policy_df = pandas.merge(all_clinics_df, policy_df, on = "state", how = "inner")
 
-    x_df = clinic_and_policy_df[["waiting_period_hours", "counseling_visits", "banned_after_weeks_since_LMP"]]
+    keyword = "ultrasound"
 
-    y_df = clinic_and_policy_df[["IV"]]
+    keyword_across_states_df = fake_and_real_keyword_across_states(keyword)
+    keyword_across_states_df = keyword_across_states_df.reset_index()
+    keyword_across_states_df = keyword_across_states_df.rename(columns = {"index" : "url"})
+    keyword_across_states_df_missing_values_map = {"ultrasound" : 0}
+    keyword_across_states_df = keyword_across_states_df.fillna(value = keyword_across_states_df_missing_values_map)
+    print(keyword_across_states_df)
+
+    clinic_policy_keyword_count_df = pandas.merge(clinic_and_policy_df, keyword_across_states_df, on = "url", how = "inner")
+
+    print(clinic_policy_keyword_count_df)
+
+    # x_df = clinic_and_policy_df[["waiting_period_hours", "counseling_visits", "banned_after_weeks_since_LMP"]]
+
+    x_df = clinic_policy_keyword_count_df[[keyword, "waiting_period_hours", "counseling_visits", "banned_after_weeks_since_LMP"]]
+
+    y_df = clinic_policy_keyword_count_df[["IV"]]
 
     X_train, X_test, y_train, y_test = train_test_split(x_df, y_df, test_size=0.2, random_state=25)
 
