@@ -4,12 +4,13 @@
 
 #poetry run python truth_inquery/database_model/api_requests.py
 
-import config
 import os
 import requests
 import json
 import pandas as pd
 from urllib.parse import urlparse
+
+api_key = "########"
 
 dir_path = "../30122-project-truth-inquery/truth_inquery/database_model" 
 
@@ -58,7 +59,7 @@ def api_calls():
         A list of json file names of the respective GET requests. 
     """
     urls = list_urls()
-    headers = { 'token': config.api_key }
+    headers = { 'token': api_key }
     files = []
     for url in urls:
         url_parts = url.split('/')
