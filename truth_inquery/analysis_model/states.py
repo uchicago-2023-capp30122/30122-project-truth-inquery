@@ -1,5 +1,6 @@
 # Matt Ryan
 
+# source: https://gist.github.com/rogerallen/1583593
 STATES = {
     'AK': 'Alaska',
     'AL': 'Alabama',

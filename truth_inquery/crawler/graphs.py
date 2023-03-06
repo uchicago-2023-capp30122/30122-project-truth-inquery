@@ -13,7 +13,8 @@ import pandas as pd
 import networkx as nx
 import random
 import matplotlib.pyplot as plt
-from hpc_urls import CPCOUT, HPCOUT, STATES
+from hpc_urls import CPCOUT, HPCOUT
+from truth_inquery.analysis_model.states import STATES
 
 random.seed(1234)
 
@@ -58,7 +59,7 @@ TOKEN_IGNORE = (
     "var", "label", "format", "instanceof", "blockquote", "solid", "text",
     "auto", "val", "column", "settings", "function", "return", 'solid',
     "opacity", "cta", "display", "and", "are", "for", "from", "has", "its",
-    "that", "the", "was", "were", "will", "with", "breakpoint", "thead"
+    "that", "the", "was", "were", "will", "with", "breakpoint", "thead", "tbody",
 )
 
 def initialize_graph(state, clinic):
