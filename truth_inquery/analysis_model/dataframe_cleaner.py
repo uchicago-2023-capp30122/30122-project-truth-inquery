@@ -1,7 +1,7 @@
 # Matt Ryan
 import sqlite3
 import pandas
-import states
+from analysis_model import states
 
 def fake_clinic_db_to_df(fake_clinic_db_path):
     '''
@@ -89,17 +89,17 @@ def policyapi_db_to_df(api_db_path):
 
     return policyapi_dataframe
 
-def keyword_count_df(state, keyword):
-    '''
-    Generates a dataframe of word counts for a user selected keyword 
-    for each real or fake clinic in a user selected state. 
+# def keyword_count_df(state, keyword):
+#     '''
+#     Generates a dataframe of word counts for a user selected keyword 
+#     for each real or fake clinic in a user selected state. 
 
-    Inputs:
-        - State, in a 2 letter abbreviation please
-        - a keyword
+#     Inputs:
+#         - State, in a 2 letter abbreviation please
+#         - a keyword
     
-    Returns keyword_count_df containing every clinic (real and fake) in the 
-    given state along with the frequency they keyword was used 
-    '''
+#     Returns keyword_count_df containing every clinic (real and fake) in the 
+#     given state along with the frequency they keyword was used 
+#     '''
 
-    token_query = "SELECT * FROM "
+#     token_query = "SELECT * FROM "

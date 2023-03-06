@@ -1,6 +1,6 @@
 # Matt Ryan
 
-abbrev_to_name = {
+STATES = {
     'AK': 'Alaska',
     'AL': 'Alabama',
     'AR': 'Arkansas',
@@ -54,4 +54,4 @@ abbrev_to_name = {
     'WY': 'Wyoming'
 }
 
-name_to_abbrev = {v: k for k, v in abbrev_to_name.items()}
+name_to_abbrev = {v: k for k, v in STATES.items()}

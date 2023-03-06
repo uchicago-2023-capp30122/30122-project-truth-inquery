@@ -5,37 +5,43 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 import pandas
-import dataframe_cleaner
+# from dataframe_cleaner import *
+from analysis_model.dataframe_cleaner import *
 
 # I think i need to add this line to help get everything working w one command
 # if __name__ == "__main__":
 
-fake_clinics_df = dataframe_cleaner.fake_clinic_db_to_df('CPC_clinics.db')
+def analyze():
 
-real_clinics_df = dataframe_cleaner.real_clinic_db_to_df('HPC_clinics.db')
+    fake_clinics_df = fake_clinic_db_to_df('CPC_clinics.db')
 
-all_clinics_df = pandas.concat([fake_clinics_df, real_clinics_df], ignore_index = True, axis = 0)
+    real_clinics_df = real_clinic_db_to_df('HPC_clinics.db')
 
-policy_df = dataframe_cleaner.policyapi_db_to_df('api.db')
+    all_clinics_df = pandas.concat([fake_clinics_df, real_clinics_df], ignore_index = True, axis = 0)
 
-clinic_and_policy_df = pandas.merge(all_clinics_df, policy_df, on = "state", how = "inner")
+    policy_df = policyapi_db_to_df('api.db')
 
-x_df = clinic_and_policy_df[["waiting_period_hours", "counseling_visits", "banned_after_weeks_since_LMP"]]
+    clinic_and_policy_df = pandas.merge(all_clinics_df, policy_df, on = "state", how = "inner")
 
-y_df = clinic_and_policy_df[["IV"]]
+    x_df = clinic_and_policy_df[["waiting_period_hours", "counseling_visits", "banned_after_weeks_since_LMP"]]
 
-X_train, X_test, y_train, y_test = train_test_split(x_df, y_df, test_size=0.2, random_state=25)
+    y_df = clinic_and_policy_df[["IV"]]
 
-reg = LinearRegression().fit(X_train, y_train)
+    X_train, X_test, y_train, y_test = train_test_split(x_df, y_df, test_size=0.2, random_state=25)
 
-y_pred = reg.predict(X_train)
-mse = mean_squared_error(y_train, y_pred)
-y_pred_test = reg.predict(X_test)
+    reg = LinearRegression().fit(X_train, y_train)
+
+    y_pred = reg.predict(X_train)
+    mse = mean_squared_error(y_train, y_pred)
+    y_pred_test = reg.predict(X_test)
 
 
-# The coefficients - i can make this into a nicely printed table
-print("Coefficients: \n", reg.coef_)
-print(mse)
+    # The coefficients - i can make this into a nicely printed table
+    print("Coefficients: \n", reg.coef_)
+    print(mse)
+
+
+# analyze()
 
 # I'd like to plot at least some things. 
 # plt.scatter(X_train["waiting_period_hours"], y_train)
