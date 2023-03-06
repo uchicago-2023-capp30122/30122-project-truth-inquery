@@ -1,3 +1,5 @@
+# Aaron Haefner
+# Collect and clean all token data, write to CSVs
 import pandas as pd
 from crawler import network_crawl, LIMIT
 from hpc_urls import CPCIN, CPCOUT, HPCIN, HPCOUT, csv_extract, get_HPC_base
