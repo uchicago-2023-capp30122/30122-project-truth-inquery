@@ -2,7 +2,9 @@
 
 to run the project with one line, run:
 
-`poetry run python truth_inquery`
+```python
+poetry run python truth_inquery
+```
 
 note that the crawler takes quite a while (days) to run fully, so this will not execute the crawler collected portion of the data pipeline. 
 
