@@ -6,6 +6,8 @@
 # 4. Tokens_CPC_clinics.db - Token files created by Aaron Haefner for CPCs statewise
 # 5. Tokens_HPC_clinics.db - Token files created by Aaron Haefner for HPCs statewise
 
+#poetry run python truth_inquery/database_model/database.py
+
 import glob
 import re
 import os
