@@ -15,7 +15,7 @@ from collections import defaultdict
 
 s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
 
-LIMIT = 1
+LIMIT = 25
 PATTERN = r'[\[0-9()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
 
 def clean_df(df):
