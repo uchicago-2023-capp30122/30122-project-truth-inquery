@@ -1,7 +1,9 @@
 # Matt Ryan
 import sqlite3
 import pandas
-from analysis_model import states
+# need to uncomment this line to keep it running from top evel
+# from analysis_model import states
+# import states
 
 def fake_clinic_db_to_df(fake_clinic_db_path):
     '''
@@ -89,17 +91,76 @@ def policyapi_db_to_df(api_db_path):
 
     return policyapi_dataframe
 
-# def keyword_count_df(state, keyword):
-#     '''
-#     Generates a dataframe of word counts for a user selected keyword 
-#     for each real or fake clinic in a user selected state. 
+def keyword_count(state, keyword):
+    '''
+    Counts word frequencies for a user selected keyword 
+    for each real or fake clinic in a user selected state. 
 
-#     Inputs:
-#         - State, in a 2 letter abbreviation please
-#         - a keyword
+    Inputs:
+        - State, in a 2 letter abbreviation please
+        - a keyword you are interested in extracting use use frequency data from across fake clinic and real clinic websites
     
-#     Returns keyword_count_df containing every clinic (real and fake) in the 
-#     given state along with the frequency they keyword was used 
-#     '''
+    Prints statements containing every clinic (real and fake) in the 
+    given state along with the frequency they keyword was used for that clinics 
+    '''
+    # could include exception error for stuff about user not entering a valid state abbrev
 
-#     token_query = "SELECT * FROM "
+    token_query = "SELECT * FROM"+ " " + state
+    cpc_token_connection = sqlite3.connect("Tokens_CPC_clinics.db")
+    hpc_token_connection = sqlite3.connect("Tokens_HPC_clinics.db")
+
+    cpc_token_df = pandas.read_sql_query(token_query, cpc_token_connection)
+    hpc_token_df = pandas.read_sql_query(token_query, hpc_token_connection)
+
+    print("fake clinics using" + " " + keyword)
+    for i in range(0, cpc_token_df.shape[0]):
+        for j in range(1, 200):
+            # would love to add a regex here to allow for fuzzy comparisons
+            if cpc_token_df.iloc[i]["token"+str(j)] == keyword:
+                print(cpc_token_df.iloc[i]["url"])
+                print(cpc_token_df.iloc[i]["count"+str(j)])
+            
+
+    print("real clinics using" + " " + keyword)
+    for i in range(0, hpc_token_df.shape[0]):
+        for j in range(1, 200):
+            # would love to add a regex here to allow for fuzzy comparisons
+            if hpc_token_df.iloc[i]["token"+str(j)] == keyword:
+                print(hpc_token_df.iloc[i]["url"])
+                print(hpc_token_df.iloc[i]["count"+str(j)])
+
+    
+def keyword_count_df_generator(state, keywords):
+    '''
+    Counts word frequencies for a selected keyword 
+    for each real or fake clinic in a selected state. 
+
+    Inputs:
+        - State, in a 2 letter abbreviation
+        - a keyword you are interested in extracting use use frequency data from
+    
+    Returns keyword_count_df containing every clinic (real and fake) in the 
+    given state along with the frequency they keyword was used for that clinics 
+    '''
+
+    urls = []
+    counts = []
+
+    token_query = "SELECT * FROM"+ " " + state
+    cpc_token_connection = sqlite3.connect("Tokens_CPC_clinics.db")
+    hpc_token_connection = sqlite3.connect("Tokens_HPC_clinics.db")
+
+    cpc_token_df = pandas.read_sql_query(token_query, cpc_token_connection)
+    hpc_token_df = pandas.read_sql_query(token_query, hpc_token_connection)
+
+    for i in range(0, cpc_token_df.shape[0]):
+        for j in range(1, 200):
+            for keyword in keywords:
+                if cpc_token_df.iloc[i]["token"+str(j)] == keyword:
+                    urls.append(cpc_token_df.iloc[i]["url"])
+                    counts.append(cpc_token_df.iloc[i]["count"+str(j)])
+    
+    fake_clinics_tokens_df = pandas.DataFrame(counts, columns = keywords, index = urls)
+
+
+    return fake_clinics_tokens_df

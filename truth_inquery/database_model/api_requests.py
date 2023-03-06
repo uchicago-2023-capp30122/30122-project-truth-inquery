@@ -58,7 +58,7 @@ def api_calls():
         A list of json file names of the respective GET requests. 
     """
     urls = list_urls()
-    headers = { 'token': config.api_key }
+    headers = { 'token': '3lqWHZ3o7076' }
     files = []
     for url in urls:
         url_parts = url.split('/')
