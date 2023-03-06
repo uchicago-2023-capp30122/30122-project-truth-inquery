@@ -1,5 +1,13 @@
 # Aaron Haefner
 # Collect healthcare provider clinic (HPC) URLs using CPC datasets
+"""
+- clone repo - 
+cd 30122-project-truth-inquery
+poetry install
+** DEMO SELENIUM **
+poetry run python truth_inquery/crawler/hpc_urls.py <state abbreviation>
+"""
+import sys
 import time
 import pandas as pd
 from selenium import webdriver
@@ -7,10 +15,49 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException
-from crawler import csv_extract, CPCIN, HPCIN, STATES
 
 WAIT = 5
 START = "https://www.abortionfinder.org"
+
+CPCIN = "truth_inquery/data/CPC_"
+CPCOUT = "truth_inquery/output/CPC_state_clinics.csv"
+HPCIN = "truth_inquery/data/HPC_urls_state.csv"
+HPCOUT = "truth_inquery/output/HPC_state_clinics.csv"
+
+# source: https://gist.github.com/rogerallen/1583593
+STATES = {
+    'AK': 'Alaska', 'AL': 'Alabama', 'AR': 'Arkansas', 'AZ': 'Arizona', 'CA': 'California',
+    'CO': 'Colorado', 'CT': 'Connecticwut', 'DC': 'District of Columbia', 'DE': 'Delaware',
+    'FL': 'Florida', 'GA': 'Georgia', 'HI': 'Hawaii', 'IA': 'Iowa', 'ID': 'Idaho',
+    'IL': 'Illinois', 'IN': 'Indiana', 'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana',
+    'MA': 'Massachusetts', 'MD': 'Maryland', 'ME': 'Maine', 'MI': 'Michigan', 'MN': 'Minnesota',
+    'MO': 'Missouri', 'MS': 'Mississippi', 'MT': 'Montana', 'NC': 'North Carolina','ND': 'North Dakota',
+    'NE': 'Nebraska', 'NH': 'New Hampshire', 'NJ': 'New Jersey', 'NM': 'New Mexico', 'NV': 'Nevada',
+    'NY': 'New York', 'OH': 'Ohio', 'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania',
+    'RI': 'Rhode Island', 'SC': 'South Carolina', 'SD': 'South Dakota', 'TN': 'Tennessee',
+    'TX': 'Texas', 'UT': 'Utah', 'VA': 'Virginia', 'VT': 'Vermont', 'WA': 'Washington',
+    'WI': 'Wisconsin', 'WV': 'West Virginia', 'WY': 'Wyoming'
+}
+
+def csv_extract(input_file):
+    """
+    Loads CPC csv input file and extracts data from columns
+
+    Inputs:
+        input_file (str): File path to .csv file
+
+    Returns: dataframe with standardized zip and url columns
+    """
+    f = pd.read_csv(input_file)
+    df = f[f['Website'].notna()]
+    df = df[['Name ', 'Zip Code', 'State', 'Website']]
+
+    # Rename columns, front-fill zipcode with zeros.
+    df = df.rename(columns={'Name ':'name', 'Zip Code':'zip', 'State':'state', 'Website':'url'})
+    df['zip'] = df['zip'].astype(str)
+    df['zip'] = df['zip'].str.zfill(5)
+    df['url'] = df['url']
+    return df
 
 def get_HPC_base(zips, state):
     """
@@ -19,17 +66,12 @@ def get_HPC_base(zips, state):
 
     When available, the crawler collects distance, address, and url (base URL) for the
     top search result (ordered by distance in miles, alphabetical otherwise).
-    Crawler does not require all data to be collected, hence many try/except blocks.
 
     Input:
         - zips (iterable/set): set of zip codes with at least one CPC in the state
-        - state (str): US state 2 letter abbreviation ******************************
-    
-    Returns:
-    df (dataframe) containing data for each inital search result URL (base URL) (str) with
-        - List of sub-URLS for each base (list of lists)
-        - Distance between CPC zip and HPC (str)
-        - Address of HPC (str)
+        - state (str): US state 2 letter abbreviation
+
+    Returns: None, writes URL-level dataset to csv used for crawling
     """
     # Create webdriver client for Chrome
     driver = webdriver.Chrome()
@@ -105,19 +147,26 @@ def get_HPC_base(zips, state):
     # Dictionary of dictionaries to DF
     driver.quit()
     df =  pd.DataFrame(HPC_data)
+    df = df.transpose()
+
     df.to_csv(HPCIN.replace("state", state))
-    return df #optional
 
-# Collect URLs for all states with CPC data (where abortion legal)
+# Collect URLs for one state with CPC data (where abortion legal)
 if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print(
+            "usage: python {} <state abbrev>".format(sys.argv[0])
+        )
+        sys.exit(1)
+    state = sys.argv[1]
+    name = STATES[state]
+    HPCinput = CPCIN + name + " (" + state + ").csv"
 
-    for state, name in STATES.items():
-        HPCinput = CPCIN + name + " (" + state + ").csv"
-        try:
-            df = csv_extract(HPCinput)
-        except FileNotFoundError:
-            print(state, "file not in data set, skipping")
-            continue
+    try:
+        df = csv_extract(HPCinput)
+    except FileNotFoundError:
+        print(state, "file not in data set, aborting")
+        sys.exit(1)
 
-        zips = set(df['zip'].tolist())
-        get_HPC_base(zips, state)
+    zips = set(df['zip'].tolist())
+    get_HPC_base(zips, state)
