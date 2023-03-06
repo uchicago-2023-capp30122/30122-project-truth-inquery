@@ -1,12 +1,13 @@
 # Aaron Haefner
 # Generate graphs from token data
 """
-- clone repo - 
+- clone repo -
 cd 30122-project-truth-inquery
 poetry install
-poetry run python truth_inquery/crawler/graphs.py <state abbrev> <num edges (int)>
+poetry run python truth_inquery/crawler/graphs.py 15
 """
 import sys
+import os
 import re
 import glob 
 import pandas as pd
@@ -21,45 +22,50 @@ random.seed(1234)
 PATTERN = r'[^a-z]'
 CPC = "CPC"
 HPC = "HPC"
-STATE_CPC = "truth_inquery/output_graphs/CPC-state-clinics.pdf"
-STATE_HPC = "truth_inquery/output_graphs/HPC-state-clinics.pdf"
-CPC_GRAPH = "truth_inquery/output_graphs/CPC-state-tokens.pdf"
-HPC_GRAPH = "truth_inquery/output_graphs/HPC-state-tokens.pdf"
+ALPHA = 0.5
+NUM_EDGES = 10
+OUTDIR = "truth_inquery/output_graphs/sub/"
+STATE_CPC = "truth_inquery/output_graphs/sub/CPC-state-clinics.pdf"
+STATE_HPC = "truth_inquery/output_graphs/sub/HPC-state-clinics.pdf"
+CPC_GRAPH = "truth_inquery/output_graphs/sub/CPC-state-edges-tokens.pdf"
+HPC_GRAPH = "truth_inquery/output_graphs/sub/HPC-state-edges-tokens.pdf"
 
 # Options for nx graphs
 OPTIONAL = {
     'CPC':{'node_color': 'red',
-           'alpha': 0.6,
+           'alpha': ALPHA,
            'node_size': 1000,
-           'width': 1},
+           'width': 0.5},
     'HPC':{'node_color': 'blue',
-           'alpha': 0.6,
+           'alpha': ALPHA,
            'node_size': 1000,
-           'width': 1}
+           'width': 0.5}
     }
 OPTIONAL_STATE = {
     'CPC':{'node_color': 'red',
-           'alpha': 0.6,
+           'alpha': ALPHA,
            'node_size': 5000,
-           'width': 2},
+           'width': 0.5},
     'HPC':{'node_color': 'blue',
-           'alpha': 0.6,
+           'alpha': ALPHA,
            'node_size': 5000,
-           'width': 2}
+           'width': 0.5}
     }
 LABELS = {
     'NODE': {"verticalalignment":'center',
            "font_size":8,
            "font_weight":"bold"
         },
-    'EDGE': {"font_size":12}
+    'EDGE': {"font_size":10}
 }
 
 TOKEN_IGNORE = (
     "var", "label", "format", "instanceof", "blockquote", "solid", "text",
     "auto", "val", "column", "settings", "function", "return", 'solid',
     "opacity", "cta", "display", "and", "are", "for", "from", "has", "its",
-    "that", "the", "was", "were", "will", "with", "breakpoint", "thead", "tbody",
+    "that", "this", "the", "was", "were", "will", "with", "breakpoint", "thead", "tbody",
+    "typeof", "hitobject", "args", "divi", "tfoot", "const", "firstsection",
+    "header", "sectionbackground", "windowhref", "nav",
 )
 
 def initialize_graph(state, clinic):
@@ -82,6 +88,7 @@ def initialize_graph(state, clinic):
     try:
         df = pd.read_csv(csv)
 
+
     except FileNotFoundError:
         print("No data on", state, "due to abortion ban or scheduling pause.")
         return None
@@ -103,7 +110,8 @@ def get_token(df, ind, i):
 
     Returns token (str) and count (int)
     """
-    token = df.loc[ind,'token'+str(i)].replace("'","")
+    token = str(df.loc[ind,'token'+str(i)])
+    token = token.replace("'","")
     count = df.loc[ind,'count'+str(i)]
     return token, count
 
@@ -120,7 +128,7 @@ def build_graph(G, df, state, num_edges):
     Returns graph object
     """
     pattern = re.compile(PATTERN)
-    ind = random.randint(0, max(df.index)-1)
+    ind = random.randint(0, max(max(df.index)-1,1))
     i = 1
 
     # Build until desired size
@@ -135,7 +143,7 @@ def build_graph(G, df, state, num_edges):
 
     return G
 
-def clinic_graph(state, clinic, num_edges=10):
+def clinic_graph(state, clinic, num_edges=NUM_EDGES):
     """
     Create clinic-level networkx graph with each node a top token
     by count and the edges labeled with the token count for the clinic input
@@ -150,7 +158,7 @@ def clinic_graph(state, clinic, num_edges=10):
     G, df = initialize_graph(state, clinic)
     return build_graph(G, df, state, num_edges)
 
-def state_graph(state, clinic, num_edges=10):
+def state_graph(state, clinic, num_edges=NUM_EDGES):
     """
     Create state-level nx graph with num_edge nodes 
     where each node represents a clinic containing 
@@ -216,45 +224,49 @@ def draw_graph(graph, state, clinic, outpath):
                                 **LABELS['EDGE'])
 
     plt.savefig(outpath, dpi=500)
-    plt.show()
+    # plt.show()
     plt.clf()
 
 if __name__ == "__main__":
     files = glob.glob("truth_inquery/output/*.csv")
 
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 2:
         print(
-            "usage: python {} <state abbrev> <num edges>".format(sys.argv[0])
+            "usage: python {} <num edges>".format(sys.argv[0])
         )
         sys.exit(1)
 
     # Set arguments
-    state, num_edges = sys.argv[1:3]
-    num_edges = int(num_edges)
-    check = CPCOUT.replace('state', state)
+    num_edges = int(sys.argv[1])
+    for state in STATES.keys():
+        
+        check = CPCOUT.replace('state', state)
 
-    # Output paths
-    cpcpath = CPC_GRAPH.replace("state",state)
-    hpcpath = HPC_GRAPH.replace("state",state)
-    state_cpc = STATE_CPC.replace("state",state)
-    state_hpc = STATE_HPC.replace("state",state)
+        # Output paths
+        statepath = OUTDIR.replace("sub", state)
+        cpcpath = CPC_GRAPH.replace("state",state).replace("sub",state).replace("edges",str(num_edges))
+        hpcpath = HPC_GRAPH.replace("state",state).replace("sub",state).replace("edges",str(num_edges))
+        state_cpc = STATE_CPC.replace("state",state).replace("sub",state)
+        state_hpc = STATE_HPC.replace("state",state).replace("sub",state)
 
-    if check not in files:
-        print(state,"data not available.")
-        sys.exit(1)
+        if check not in files or state in ["NH"]:
+            print(state,"data not available.")
+            # sys.exit(1)
+            continue
+        if not os.path.exists(statepath):
+            os.makedirs(statepath)
+        # Clinic-level graphs
+        G_cpc = clinic_graph(state, CPC, num_edges)
+        draw_graph(G_cpc, state, CPC, cpcpath)
 
-    # Clinic-level graphs
-    G_cpc = clinic_graph(state, CPC, num_edges)
-    draw_graph(G_cpc, state, CPC, cpcpath)
+        G_hpc = clinic_graph(state, HPC, num_edges)
+        draw_graph(G_hpc, state, HPC, hpcpath)
 
-    G_hpc = clinic_graph(state, HPC, num_edges)
-    draw_graph(G_hpc, state, HPC, hpcpath)
+        # State-level graphs
+        CPC_state = state_graph(state, CPC)
+        draw_graph(CPC_state, state, CPC, state_cpc)
 
-    # State-level graphs
-    CPC_state = state_graph(state, CPC)
-    draw_graph(CPC_state, state, CPC, state_cpc)
+        HPC_state = state_graph(state, HPC)
+        draw_graph(HPC_state, state, HPC, state_hpc)
 
-    HPC_state = state_graph(state, HPC)
-    draw_graph(CPC_state, state, HPC, state_hpc)
-
-    print("Graphs drawn")
+        print(state, "graphs drawn")
