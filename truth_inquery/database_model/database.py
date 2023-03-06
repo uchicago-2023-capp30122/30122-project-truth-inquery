@@ -12,9 +12,9 @@ import os
 import pandas as pd
 import sqlite3
 
-path1 = "../truth_inquery/database_model"
-path2 = "../truth_inquery/output" 
-path3 = "../truth_inquery/data" 
+path1 = "../30122-project-truth-inquery/truth_inquery/database_model"
+path2 = "../30122-project-truth-inquery/truth_inquery/output" 
+path3 = "../30122-project-truth-inquery/truth_inquery/data" 
 
 def api_db(): 
     """

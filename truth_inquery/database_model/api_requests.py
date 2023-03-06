@@ -2,6 +2,8 @@
 #Retrieves data using GET requests from https://www.abortionpolicyapi.com and 
 #converts the json files to csv files 
 
+#poetry run python truth_inquery/database_model/api_requests.py
+
 import config
 import os
 import requests
@@ -9,7 +11,7 @@ import json
 import pandas as pd
 from urllib.parse import urlparse
 
-dir_path = "../truth_inquery/database_model" 
+dir_path = "../30122-project-truth-inquery/truth_inquery/database_model" 
 
 relative_urls = ["/v1/gestational_limits/states/", 
                 "/v1/insurance_coverage/states/", 
