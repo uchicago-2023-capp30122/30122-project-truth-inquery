@@ -1,4 +1,11 @@
 # Aaron Haefner
+# Crawl and tokenize URLs
+"""
+- clone repo - 
+cd 30122-project-truth-inquery
+poetry install
+poetry run python truth_inquery/crawler
+"""
 import lxml.html
 import pandas as pd
 import re
@@ -8,45 +15,8 @@ from collections import defaultdict
 
 s = scrapelib.Scraper(retry_attempts=0, retry_wait_seconds=0)
 
-LIMIT = 25
-
-CPCIN = "truth_inquery/data/CPC_"
-CPCOUT = "truth_inquery/output/CPC_state_clinics.csv"
-
-HPCIN = "truth_inquery/data/HPC_urls_state.csv"
-HPCOUT = "truth_inquery/output/HPC_state_clinics.csv"
-
+LIMIT = 1
 PATTERN = r'[\[0-9()="?!}{<>.,~`@#$%&*^_+:;|\]\\\/]'
-
-# source: https://gist.github.com/rogerallen/1583593
-STATES = {
-    'AK': 'Alaska', 'AL': 'Alabama', 'AR': 'Arkansas', 'AZ': 'Arizona', 'CA': 'California',
-    'CO': 'Colorado', 'CT': 'Connecticwut', 'DC': 'District of Columbia', 'DE': 'Delaware',
-    'FL': 'Florida', 'GA': 'Georgia', 'HI': 'Hawaii', 'IA': 'Iowa', 'ID': 'Idaho',
-    'IL': 'Illinois', 'IN': 'Indiana', 'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana',
-    'MA': 'Massachusetts', 'MD': 'Maryland', 'ME': 'Maine', 'MI': 'Michigan', 'MN': 'Minnesota',
-    'MO': 'Missouri', 'MS': 'Mississippi', 'MT': 'Montana', 'NC': 'North Carolina','ND': 'North Dakota',
-    'NE': 'Nebraska', 'NH': 'New Hampshire', 'NJ': 'New Jersey', 'NM': 'New Mexico', 'NV': 'Nevada',
-    'NY': 'New York', 'OH': 'Ohio', 'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania',
-    'RI': 'Rhode Island', 'SC': 'South Carolina', 'SD': 'South Dakota', 'TN': 'Tennessee',
-    'TX': 'Texas', 'UT': 'Utah', 'VA': 'Virginia', 'VT': 'Vermont', 'WA': 'Washington', 
-    'WI': 'Wisconsin', 'WV': 'West Virginia', 'WY': 'Wyoming'
-}
-
-INDEX_IGNORE = (
-    "and",
-    "are",
-    "for",
-    "from",
-    "has",
-    "its",
-    "that",
-    "the",
-    "was",
-    "were",
-    "will",
-    "with"
-)
 
 def clean_df(df):
     """
@@ -60,27 +30,6 @@ def clean_df(df):
     output['count'] = output.sum(axis=1)
     output = output[['count']]
     return output
-
-def csv_extract(input_file):
-    """
-    Loads CPC csv input file and extracts 'Website'
-    column to convert to list of urls
-
-    Inputs:
-        input_file (str): File path to .csv file
-
-    Returns: list of URLs
-    """
-    f = pd.read_csv(input_file)
-    df = f[f['Website'].notna()]
-    df = df[['Name ', 'Zip Code', 'State', 'Website']]
-
-    # Rename columns, front-fill zipcode with zeros.
-    df = df.rename(columns={'Name ':'name', 'Zip Code':'zip', 'State':'state', 'Website':'url'})
-    df['zip'] = df['zip'].astype(str)
-    df['zip'] = df['zip'].str.zfill(5)
-    df['url'] = df['url']
-    return df
 
 def get_root(url):
     """
@@ -122,7 +71,7 @@ def tokenize(root):
         if re.search(pattern, str_key) is not None:
             continue
         # Word exclusion and length restrictions
-        if str_key not in INDEX_IGNORE and len(str_key) > 2 and len(str_key) < 25:
+        if len(str_key) > 2 and len(str_key) < 25:
             tokens[str_key] += 1
 
         # Checks time EVERY token - not ideal?
@@ -194,7 +143,7 @@ def network_crawl(urllst, outpath, limit=LIMIT):
         # If root is none skip
         if crawldf is None:
             continue
-        
+
         # Unpack output of crawl and add to data accumulators
         nextdf, urls_visited = crawldf
 
@@ -219,11 +168,11 @@ def network_crawl(urllst, outpath, limit=LIMIT):
     # Key for merge
     res['index'] = "count" +  res['index'].astype(str)
 
-    # save url-level csv containing top tokens 
-    top_clinic_tokens(clinic, res, outpath)
+    # Save url-level csv containing top tokens 
+    tidy_top_tokens(clinic, res, outpath)
 
 
-def top_clinic_tokens(df, df_ids, outpath, num=200):
+def tidy_top_tokens(df, df_ids, outpath, num=200):
     """
     Cleans input token df to merge with df_ids and saves csv with
     top num tokens.
@@ -237,72 +186,41 @@ def top_clinic_tokens(df, df_ids, outpath, num=200):
     Returns: None, writes standardized dataframe of nlargest tokens to csv
     """
     # Accumulate top num tokens in newdf
+    ordered_cols = []
+    for n in range(0,num+1):
+        ordered_cols.append('token'+str(n))
+        ordered_cols.append('count'+str(n))
+
     newdf = pd.DataFrame()
     df = df.transpose()
     df.columns = df.iloc[0]
     df = df.iloc[1:]
 
-    # Loop over columns and generate (token,count) tuple
+    # Loop over columns and generate token and count columns for each top token
     for col in df.columns[1:]:
 
         # Single (column) df 'sdf'
         sdf = df[['token',col]]
-        # Sort descending by token count and select first num rows
-        sdf[col] = sdf[col].astype(float)
-        sdf = sdf.sort_values(by=col, ascending = False)
-        sdf = sdf.iloc[0:num,]
 
+        # Sort descending by token count and select first num rows
+        sdf[col] = sdf[col].astype(int)
+        sdf = sdf.sort_values(by=col, ascending = False)
+        sdf = sdf.iloc[0:num+1,]
+
+        # Reset index, create index column for reshape
         sdf = sdf.reset_index()
         sdf = sdf.drop('index', axis=1)
-
-        # Generate tuple row and replace original col with tuples
-        sdf['tuple'] = list(zip(sdf['token'], sdf[col]))
-        sdf = sdf.drop(['token',col], axis=1)
-        sdf = sdf.rename(columns={'tuple':col})
-        sdf = sdf.transpose()
+        sdf = sdf.reset_index()
+        sdf['id'] = col
+        sdf = sdf.rename(columns={col:'count'})
+        sdf['index'] = sdf['index'].astype(str)
+        sdf = sdf.pivot(values=['token','count'], columns='index', index='id')
+        sdf.columns = [', '.join(col).replace(', ','',1) for col in sdf.columns]
+        sdf = sdf[ordered_cols]
 
         # Add single row (URL) with top num token tuples as columns
         newdf = pd.concat([newdf, sdf])
-    
+
     # Merge tokens with xwalk on count`num` identifier
-    output = pd.merge(df_ids, newdf, left_on='index',right_on='index',how='outer')
+    output = pd.merge(df_ids, newdf, left_on='index',right_on='id',how='outer')
     output.to_csv(outpath)
-
-# States that are not crawled due to abortion restrictions
-# banned: Alabama Arkansas Idaho Kentucky Louisiana Mississippi Missouri 
-#         Oklahoma South Dakota Tennessee Texas West Virginia
-# stopped scheduling: North Dakota Wisconsin
-# This takes all input data for each state CPCs and HPCs and tokenizes URLs into CSVs
-if __name__ == "__main__":
-
-    for stabb, name in STATES.items():
-        # Crawl CPC urls
-        try:
-            CPCinput = CPCIN + name + " (" + stabb + ").csv"
-            CPCoutput = CPCOUT.replace("state", stabb)
-            df = csv_extract(CPCinput)
-        except FileNotFoundError:
-            print(stabb, "file does not exist")
-            continue
-
-        urls = df['url'].tolist()[0:6]
-
-        # print("Crawling CPCs in", stabb)
-        network_crawl(urls, CPCoutput, LIMIT)
-
-        # Crawl HPC urls
-        HPCinput = HPCIN.replace("state", stabb)
-        HPCoutput = HPCOUT.replace("state", stabb)
-
-        try: 
-            HPC = pd.read_csv(HPCinput)
-        except FileNotFoundError:
-            print(stabb, "file does not exist")
-            continue
-
-        HPC_urls = HPC['url'].to_list()
-
-        print("Crawling HPCs in", stabb)
-        network_crawl(HPC_urls, HPCoutput, LIMIT)
-
-        print(stabb,"CPCs and HPCs saved")
