@@ -96,19 +96,26 @@ def analyze():
 
     X_train, X_test, y_train, y_test = train_test_split(x_df, y_df, test_size=0.2, random_state=25)
 
+    print(X_train)
+
     reg = LinearRegression().fit(X_train, y_train)
 
     y_pred = reg.predict(X_train)
     mse = mean_squared_error(y_train, y_pred)
     y_pred_test = reg.predict(X_test)
-
+    # r2 = r2_score(y_test, y_pred)
 
     # The coefficients - i can make this into a nicely printed table
     print("Coefficients: \n", reg.coef_)
-    print(mse)
+    print("mean squared error:", mse)
+    # print("r^2:", r2)
+
+    return X_train, y_train, y_pred, clinic_policy_keyword_count_df
+
 
 # for running from somewhere else
 # analyze()
+
 
 # I'd like to plot at least some things. 
 # plt.scatter(X_train["waiting_period_hours"], y_train)
@@ -118,3 +125,12 @@ def analyze():
 # plt.savefig("/home/mattryan/programmingturk/FinalProject/truth_inquery/analysis_model/plot.png")
 # plt.show()
 
+# Plot sepal width as a function of sepal_length across days
+# g = sns.lmplot(
+#     data=penguins,
+#     x="bill_length_mm", y="bill_depth_mm", hue="species",
+#     height=5
+# )
+
+# # Use more informative axis labels than are provided by default
+# g.set_axis_labels("Snoot length (mm)", "Snoot depth (mm)")
