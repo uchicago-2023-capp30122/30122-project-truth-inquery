@@ -9,7 +9,7 @@ poetry install
 
 You can run the entire project from the command line using the following commands:
 
-1. We use a separate command to crawl URLs for data since it takes more than a day to complete.
+1. We use a separate command to crawl URLs for data since it takes more than a day to complete. This command crawls crisis pregnancy center websites then collects the websites of nearby healthcare providers websites and crawls those.
 
 ```python
 poetry run python truth_inquery/crawler
