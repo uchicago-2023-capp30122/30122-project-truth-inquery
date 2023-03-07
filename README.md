@@ -5,20 +5,25 @@ After cloning the repo, you can set up the project as follows:
 ```python
 cd 30122-project-truth-inquery
 poetry install
-poetry run python truth_inquery
 ```
 
 You can run the entire project from the command line using the following commands:
 
+1. We use a separate command to crawl URLs for data since it takes more than a day to complete.
 
+```python
+poetry run python truth_inquery/crawler
+```
 
-run:
-to run the project with one line, run:
-`poetry run python truth_inquery`
+2. The databases are created and regression analysis completed using,
+```python
+poetry run python truth_inquery
+```
 
-note that the crawler takes quite a while (days) to run fully, so this will not execute the crawler collected portion of the data pipeline. 
-
-
+3. Finally, all of the graph output is generated using, 
+```python
+poetry run python truth_inquery/crawler/graphs.py 15
+```
 
 
 
