@@ -29,6 +29,8 @@ poetry run python truth_inquery/crawler/graphs.py 15
 
 ## Data Sources
 ### Abortion Policy API
+1. We requested and were granted access to the ([Abortion Policy API](https://www.abortionpolicyapi.com/)) which contains information on abortion policy by state. We use three variables from this API (waiting period required by law, number of counseling visits mandated by law, and a measure of how many weeks after last menstrual period (LMP) aboriton is legally restricted in that state) as controls to account for the variation across states. 
+Note: We have sent James our API Key that is required to generate a portion of the data this project relies upon through API calls. 
 
 ### Data collection
 1. We collect data from crisis pregnancy center (CPC) websites and up to 50 URLs to which the base CPC website links. 
@@ -42,6 +44,7 @@ site using the provided CPC zip code.
 ### Database
 
 ## Analysis
+
 
 ### Model
 
