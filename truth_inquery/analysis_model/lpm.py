@@ -5,13 +5,83 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 import pandas
-# from dataframe_cleaner import *
-from analysis_model.dataframe_cleaner import *
+from truth_inquery.analysis_model.dataframe_cleaner import *
+# from analysis_model.dataframe_cleaner import *
+# import states
 
-# I think i need to add this line to help get everything working w one command
-# if __name__ == "__main__":
+STATES = {
+    'AK': 'Alaska',
+    'AL': 'Alabama',
+    'AR': 'Arkansas',
+    'AZ': 'Arizona',
+    'CA': 'California',
+    'CO': 'Colorado',
+    'CT': 'Connecticut',
+    'DC': 'District of Columbia',
+    'DE': 'Delaware',
+    'FL': 'Florida',
+    'GA': 'Georgia',
+    'HI': 'Hawaii',
+    'IA': 'Iowa',
+    'ID': 'Idaho',
+    'IL': 'Illinois',
+    'IN': 'Indiana',
+    'KS': 'Kansas',
+    'KY': 'Kentucky',
+    'LA': 'Louisiana',
+    'MA': 'Massachusetts',
+    'MD': 'Maryland',
+    'ME': 'Maine',
+    'MI': 'Michigan',
+    'MN': 'Minnesota',
+    'MO': 'Missouri',
+    'MS': 'Mississippi',
+    'MT': 'Montana',
+    'NC': 'North Carolina',
+    'ND': 'North Dakota',
+    'NE': 'Nebraska',
+    'NH': 'New Hampshire',
+    'NJ': 'New Jersey',
+    'NM': 'New Mexico',
+    'NV': 'Nevada',
+    'NY': 'New York',
+    'OH': 'Ohio',
+    'OK': 'Oklahoma',
+    'OR': 'Oregon',
+    'PA': 'Pennsylvania',
+    'RI': 'Rhode Island',
+    'SC': 'South Carolina',
+    'SD': 'South Dakota',
+    'TN': 'Tennessee',
+    'TX': 'Texas',
+    'UT': 'Utah',
+    'VA': 'Virginia',
+    'VT': 'Vermont',
+    'WA': 'Washington',
+    'WI': 'Wisconsin',
+    'WV': 'West Virginia',
+    'WY': 'Wyoming'
+}
 
-def analyze():
+def analyze(keyword):
+    '''
+    Given a keyword that you're interested in examining in terms of its frequency across fake and real aboriton clinics across all 50 states 
+    with some controls for state to state variation, this analyze function constructs the relevant dataframes from web crawled and api data sources, 
+    executes a linear regression (linear probability model or LPM), prints a table of the coefficients associated with each variable and the mean squared
+    error of the regression for that keyword.  
+
+    Inputs:
+        - keyword, a string of interest to use in comparing real to fake clinic websites. 
+    
+    Prints a table with coefficients, the keyword, and mean squared error for the regression
+
+    Returns the mean squared error and constructed dataframe that the regression was run on containing real and fake clinic urls, state policy data, 
+    and the frequency the given keyword appears across each website. 
+
+    '''
+
+    # keyword = "ultrasound"
+    assert isinstance (keyword, str), "keyword should be a python string type variable and needs to be entered with single ' '  or double " " quotations"
 
     fake_clinics_df = fake_clinic_db_to_df('CPC_clinics.db')
 
@@ -23,9 +93,18 @@ def analyze():
 
     clinic_and_policy_df = pandas.merge(all_clinics_df, policy_df, on = "state", how = "inner")
 
-    x_df = clinic_and_policy_df[["waiting_period_hours", "counseling_visits", "banned_after_weeks_since_LMP"]]
+    keyword_across_states_df = fake_and_real_keyword_across_states(keyword)
+    keyword_across_states_df = keyword_across_states_df.reset_index()
+    keyword_across_states_df = keyword_across_states_df.rename(columns = {"index" : "url"})
+    # here was the change
+    keyword_across_states_df_missing_values_map = {str(keyword) : 0}
+    keyword_across_states_df = keyword_across_states_df.fillna(value = keyword_across_states_df_missing_values_map)
 
-    y_df = clinic_and_policy_df[["IV"]]
+    clinic_policy_keyword_count_df = pandas.merge(clinic_and_policy_df, keyword_across_states_df, on = "url", how = "inner")
+
+    x_df = clinic_policy_keyword_count_df[[keyword, "waiting_period_hours", "counseling_visits", "banned_after_weeks_since_LMP"]]
+
+    y_df = clinic_policy_keyword_count_df[["IV"]]
 
     X_train, X_test, y_train, y_test = train_test_split(x_df, y_df, test_size=0.2, random_state=25)
 
@@ -34,202 +113,21 @@ def analyze():
     y_pred = reg.predict(X_train)
     mse = mean_squared_error(y_train, y_pred)
     y_pred_test = reg.predict(X_test)
-
-
-    # The coefficients - i can make this into a nicely printed table
-    print("Coefficients: \n", reg.coef_)
-    print(mse)
-
-
-# analyze()
-
-# I'd like to plot at least some things. 
-# plt.scatter(X_train["waiting_period_hours"], y_train)
-# plt.plot(X_train["waiting_period_hours"], y_pred, color="red")
-# plt.xlabel("x")
-# plt.ylabel("y")
-# plt.savefig("/home/mattryan/programmingturk/FinalProject/truth_inquery/analysis_model/plot.png")
-# plt.show()
-
-
-
-
-
-
-
-
-## remove - just in case
-
-
-#create a dataframe from the CPC clinics
-
-# cpc_connection = sqlite3.connect('CPC_clinics.db')
-
-# cpc_query= 'SELECT IV, Website, State FROM CPC_Clinics'
-
-# cpc_dataframe = pandas.read_sql_query(cpc_query, cpc_connection)
-# cpc_dataframe = cpc_dataframe.rename(columns = {"Website" : "url", "State" : "state"})
-# cpc_dataframe["state"] = cpc_dataframe["state"].str[-4:]
-# cpc_dataframe["state"] = cpc_dataframe["state"].str.replace(r'[()]',"", regex = True)
-
-# print()
-# print(cpc_dataframe.head())
-# print()
-
-# I'm not sure if this is necessary, seems like it might be good practice from what I've been able to read. !!! Ask about this
-# cpc_connection.close()
-
-
-# Step 3: add dummy variable 'is_cpc' to the cpc_dataframe and initialize it to 1 for all rows
-# Dema did this in pre-processing
-
-
-# Step 4: Once step 1 is complete, create a dataframe from the HPC clinics
-
-# hpc_connection = sqlite3.connect('HPC_clinics.db')
-
-# hpc_query = 'SELECT IV, url, state FROM HPC_clinics'
-
-# hpc_dataframe = pandas.read_sql_query(hpc_query, hpc_connection)
-# print()
-# print(hpc_dataframe.head())
-# print()
-
-# hpc_connection.close()
-
-# Step 5: add dummy variable 'is_cpc' to the hpc_dataframe adn initialize it to 0 for all rows
-
-# Dema did this
-
-# Step 6: Combine the cpc_dataframe and hpc_dataframe one on top of another. Cascade? We can call this combined_clinic_dataframe
-
-# cpc_and_hpc_dataframe = pandas.concat([cpc_dataframe, hpc_dataframe], ignore_index = True, axis = 0)
-
-# print()
-# print(cpc_and_hpc_dataframe.head())
-# print()
-
-
-
-# Step 7: putting API data into a dataframe
-
-# policyapi_connection = sqlite3.connect('api.db')
-
-# policyapi_cursor = policyapi_connection.cursor()
-
-# policyapi_query = "SELECT * FROM API"
-
-# policyapi_dataframe = pandas.read_sql_query(policyapi_query, policyapi_connection)
-
-# # transpose the dataframe and adjust the index header so that policy features like 
-# # "waiting_period_hours" are the columns, and mapping the full state names onto
-# # abbreviated state names
-# policyapi_dataframe = policyapi_dataframe.T
-# policyapi_dataframe = policyapi_dataframe[1:]
-# policyapi_dataframe.columns = policyapi_dataframe.iloc[0]
-# policyapi_dataframe = policyapi_dataframe.iloc[1:]
-# policyapi_dataframe.index = policyapi_dataframe.index.map(states.name_to_abbrev)
-# policyapi_dataframe["state"] = policyapi_dataframe.index
-# policyapi_fill_missing_values_map = {"waiting_period_hours" : 0, "counseling_visits" : 0, "banned_after_weeks_since_LMP" : 0}
-# policyapi_dataframe = policyapi_dataframe.fillna(value = policyapi_fill_missing_values_map)
-
-# print()
-# print(policyapi_dataframe)
-# print()
-
-# policyapi_dataframe
-
-# print()
-# print(policyapi_dataframe)
-# print()
-
-
-
-
-
-# policyapi_connection.close()
-
-
-# Step 8: join api_dataframe to combined_clinic_dateframe . . . on state
-
-# cpchpcpolicy_df = pandas.merge(cpc_and_hpc_dataframe, policyapi_dataframe, on = "state", how = "inner")
-
-# print("here is the joined dataframe for the regression")
-# print(cpchpcpolicy_df)
-# print()
-
-
-
-
-
-# Step 9: select all input variables (api legal status, top 10 token counts, etc) into a single dataframe X
-
-# x_df = cpchpcpolicy_df[["waiting_period_hours", "counseling_visits", "banned_after_weeks_since_LMP"]]
-
-# print("this is the x dataframe")
-# print(type(x_df["waiting_period_hours"]))
-# print(x_df.iloc[200:250])
-# print(x_df.shape)
-
-# Step 10: select all outcome variables, in this case (is_cpc) into a single dataframe y
-
-# y_df = cpchpcpolicy_df[["IV"]]
-# print(y_df)
-# print(x_df.shape)
-# print(y_df.shape)
-
-# # Step 11: Split the finalized flattened and joined combined_and_joined_clinic_dataframe into train and test subsets using sklearn
-
-# X_train, X_test, y_train, y_test = train_test_split(x_df, y_df, test_size=0.2, random_state=25)
-
-# print("shape check")
-# print(X_train.shape)
-
-# # print(X_test.shape)
-# # print(y_train.shape)
-# # print(y_test.shape)
-
-# reg = LinearRegression().fit(X_train, y_train)
-
-# # logistic regression may be better suited
-
-# y_pred = reg.predict(X_train)
-# # mean_squared_error(y_train, y_pred)
-# print("LOOK AT THIS")
-# print(X_train.shape)
-# print(y_pred.shape)
-
-# y_pred_test = reg.predict(X_test)
-
-
-
-# print(y_pred.shape)
-
-# # The coefficients
-# print("Coefficients: \n", reg.coef_)
-
-# The mean squared error
-# print("Mean squared error: %.2f" % mean_squared_error(y_test, y_pred))
-
-
-# The coefficient of determination: 1 is perfect prediction
-# print("Coefficient of determination: %.2f" % r2_score(y_test, y_pred))
-
-
-
-# # ploting worked as long as I did one column of the combined df vs y_train
-
-# plt.scatter(X_train["waiting_period_hours"], y_train)
-# plt.plot(X_train["waiting_period_hours"], y_pred, color="red")
-# plt.xlabel("x")
-# plt.ylabel("y")
-# plt.savefig("/home/mattryan/programmingturk/FinalProject/truth_inquery/analysis_model/plot.png")
-# plt.show()
-
-
-
-# Step 12: build the regression model from the training subset
-# from sklearn.linear_model import LinearRegression
-
-
-# Step 13: test the regression model on the test subset
+    waiting_period_coef = reg.coef_[0][0]
+    counseling_visits_coef = reg.coef_[0][1]
+    banned_after_weeks_since_LMP_coef = reg.coef_[0][2]
+    keyword_coef = reg.coef_[0][3] 
+
+
+    # Display output
+    space = " "
+    s10 = space*10
+    # print("---------------Coefficients---------------\n waiting period | counseling visits | abortion banned(wks) |"+" "+keyword+" \n", reg.coef_)
+    print(space*40, "---------------Coefficients---------------\n","waiting period", s10, "|", s10, counseling visits, s10, "|", s10, abortion banned(wks), s10,  "|", s10, keyword)
+    print() 
+    print(waiting_period_coef, s10, counseling_visits_coef, s10, banned_after_weeks_since_LMP_coef, s10, keyword_coef)
+    print()
+    print("-----mean squared error-----\n", mse)
+    print("a lower mean squared error between selected keywords indicates that the selected keyword is a better predictor of a fake clinic website")
+
+    return mse, clinic_policy_keyword_count_df
