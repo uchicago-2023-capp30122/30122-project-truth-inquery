@@ -5,63 +5,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 import matplotlib.pyplot as plt
 import pandas
-from truth_inquery.analysis_model.dataframe_cleaner import *
-# from analysis_model.dataframe_cleaner import *
-# import states
-
-STATES = {
-    'AK': 'Alaska',
-    'AL': 'Alabama',
-    'AR': 'Arkansas',
-    'AZ': 'Arizona',
-    'CA': 'California',
-    'CO': 'Colorado',
-    'CT': 'Connecticut',
-    'DC': 'District of Columbia',
-    'DE': 'Delaware',
-    'FL': 'Florida',
-    'GA': 'Georgia',
-    'HI': 'Hawaii',
-    'IA': 'Iowa',
-    'ID': 'Idaho',
-    'IL': 'Illinois',
-    'IN': 'Indiana',
-    'KS': 'Kansas',
-    'KY': 'Kentucky',
-    'LA': 'Louisiana',
-    'MA': 'Massachusetts',
-    'MD': 'Maryland',
-    'ME': 'Maine',
-    'MI': 'Michigan',
-    'MN': 'Minnesota',
-    'MO': 'Missouri',
-    'MS': 'Mississippi',
-    'MT': 'Montana',
-    'NC': 'North Carolina',
-    'ND': 'North Dakota',
-    'NE': 'Nebraska',
-    'NH': 'New Hampshire',
-    'NJ': 'New Jersey',
-    'NM': 'New Mexico',
-    'NV': 'Nevada',
-    'NY': 'New York',
-    'OH': 'Ohio',
-    'OK': 'Oklahoma',
-    'OR': 'Oregon',
-    'PA': 'Pennsylvania',
-    'RI': 'Rhode Island',
-    'SC': 'South Carolina',
-    'SD': 'South Dakota',
-    'TN': 'Tennessee',
-    'TX': 'Texas',
-    'UT': 'Utah',
-    'VA': 'Virginia',
-    'VT': 'Vermont',
-    'WA': 'Washington',
-    'WI': 'Wisconsin',
-    'WV': 'West Virginia',
-    'WY': 'Wyoming'
-}
+from analysis_model.dataframe_cleaner import *
+from truth_inquery.analysis_model.states import *
+import sys
 
 def analyze(keyword):
     '''
@@ -123,7 +69,7 @@ def analyze(keyword):
     space = " "
     s10 = space*10
     # print("---------------Coefficients---------------\n waiting period | counseling visits | abortion banned(wks) |"+" "+keyword+" \n", reg.coef_)
-    print(space*40, "---------------Coefficients---------------\n","waiting period", s10, "|", s10, counseling visits, s10, "|", s10, abortion banned(wks), s10,  "|", s10, keyword)
+    # print(space*40, "---------------Coefficients---------------\n","waiting period", s10, "|", s10, counseling visits, s10, "|", s10, abortion banned(wks), s10,  "|", s10, keyword)
     print() 
     print(waiting_period_coef, s10, counseling_visits_coef, s10, banned_after_weeks_since_LMP_coef, s10, keyword_coef)
     print()

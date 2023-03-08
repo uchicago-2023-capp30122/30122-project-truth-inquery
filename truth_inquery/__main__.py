@@ -20,6 +20,7 @@ if __name__ == "__main__":
     token_related_db("HPC", "Tokens_HPC_clinics")
     print("Tokens_CPC_clinics and Tokens_HPC_clinics databases created")
 
-    analyze()
+    keyword = sys.argv[1]
+    analyze(keyword)
 
 
