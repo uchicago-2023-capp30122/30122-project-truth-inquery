@@ -63,7 +63,25 @@ STATES = {
     'WY': 'Wyoming'
 }
 
-def analyze():
+def analyze(keyword):
+    '''
+    Given a keyword that you're interested in examining in terms of its frequency across fake and real aboriton clinics across all 50 states 
+    with some controls for state to state variation, this analyze function constructs the relevant dataframes from web crawled and api data sources, 
+    executes a linear regression (linear probability model or LPM), prints a table of the coefficients associated with each variable and the mean squared
+    error of the regression for that keyword.  
+
+    Inputs:
+        - keyword, a string of interest to use in comparing real to fake clinic websites. 
+    
+    Prints a table with coefficients, the keyword, and mean squared error for the regression
+
+    Returns the mean squared error and constructed dataframe that the regression was run on containing real and fake clinic urls, state policy data, 
+    and the frequency the given keyword appears across each website. 
+
+    '''
+
+    # keyword = "ultrasound"
+    assert isinstance (keyword, str), "keyword should be a python string type variable and needs to be entered with single ' '  or double " " quotations"
 
     fake_clinics_df = fake_clinic_db_to_df('CPC_clinics.db')
 
@@ -75,20 +93,14 @@ def analyze():
 
     clinic_and_policy_df = pandas.merge(all_clinics_df, policy_df, on = "state", how = "inner")
 
-    keyword = "ultrasound"
-
     keyword_across_states_df = fake_and_real_keyword_across_states(keyword)
     keyword_across_states_df = keyword_across_states_df.reset_index()
     keyword_across_states_df = keyword_across_states_df.rename(columns = {"index" : "url"})
-    keyword_across_states_df_missing_values_map = {"ultrasound" : 0}
+    # here was the change
+    keyword_across_states_df_missing_values_map = {str(keyword) : 0}
     keyword_across_states_df = keyword_across_states_df.fillna(value = keyword_across_states_df_missing_values_map)
-    print(keyword_across_states_df)
 
     clinic_policy_keyword_count_df = pandas.merge(clinic_and_policy_df, keyword_across_states_df, on = "url", how = "inner")
-
-    print(clinic_policy_keyword_count_df)
-
-    # x_df = clinic_and_policy_df[["waiting_period_hours", "counseling_visits", "banned_after_weeks_since_LMP"]]
 
     x_df = clinic_policy_keyword_count_df[[keyword, "waiting_period_hours", "counseling_visits", "banned_after_weeks_since_LMP"]]
 
@@ -96,41 +108,26 @@ def analyze():
 
     X_train, X_test, y_train, y_test = train_test_split(x_df, y_df, test_size=0.2, random_state=25)
 
-    print(X_train)
-
     reg = LinearRegression().fit(X_train, y_train)
 
     y_pred = reg.predict(X_train)
     mse = mean_squared_error(y_train, y_pred)
     y_pred_test = reg.predict(X_test)
-    # r2 = r2_score(y_test, y_pred)
-
-    # The coefficients - i can make this into a nicely printed table
-    print("Coefficients: \n", reg.coef_)
-    print("mean squared error:", mse)
-    # print("r^2:", r2)
-
-    return X_train, y_train, y_pred, clinic_policy_keyword_count_df
+    waiting_period_coef = reg.coef_[0][0]
+    counseling_visits_coef = reg.coef_[0][1]
+    banned_after_weeks_since_LMP_coef = reg.coef_[0][2]
+    keyword_coef = reg.coef_[0][3] 
 
 
-# for running from somewhere else
-# analyze()
+    # Display output
+    space = " "
+    s10 = space*10
+    # print("---------------Coefficients---------------\n waiting period | counseling visits | abortion banned(wks) |"+" "+keyword+" \n", reg.coef_)
+    print(space*40, "---------------Coefficients---------------\n","waiting period", s10, "|", s10, counseling visits, s10, "|", s10, abortion banned(wks), s10,  "|", s10, keyword)
+    print() 
+    print(waiting_period_coef, s10, counseling_visits_coef, s10, banned_after_weeks_since_LMP_coef, s10, keyword_coef)
+    print()
+    print("-----mean squared error-----\n", mse)
+    print("a lower mean squared error between selected keywords indicates that the selected keyword is a better predictor of a fake clinic website")
 
-
-# I'd like to plot at least some things. 
-# plt.scatter(X_train["waiting_period_hours"], y_train)
-# plt.plot(X_train["waiting_period_hours"], y_pred, color="red")
-# plt.xlabel("x")
-# plt.ylabel("y")
-# plt.savefig("/home/mattryan/programmingturk/FinalProject/truth_inquery/analysis_model/plot.png")
-# plt.show()
-
-# Plot sepal width as a function of sepal_length across days
-# g = sns.lmplot(
-#     data=penguins,
-#     x="bill_length_mm", y="bill_depth_mm", hue="species",
-#     height=5
-# )
-
-# # Use more informative axis labels than are provided by default
-# g.set_axis_labels("Snoot length (mm)", "Snoot depth (mm)")
+    return mse, clinic_policy_keyword_count_df

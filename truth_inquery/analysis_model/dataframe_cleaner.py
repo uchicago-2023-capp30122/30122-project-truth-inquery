@@ -65,6 +65,8 @@ name_to_abbrev = {v: k for k, v in STATES.items()}
 def fake_clinic_db_to_df(fake_clinic_db_path):
     '''
     Generates and cleans a dataframe of fake clinics for analysis. 
+    Note: This can be expanded later and the selection of IV, Website, State is for normalizing
+    the schema between fake and real clinics. With more development, more columsn could be added and reconciled. 
 
     Inputs:
         - path to the fake clinic (CPC) database
@@ -80,7 +82,8 @@ def fake_clinic_db_to_df(fake_clinic_db_path):
     cpc_dataframe = pandas.read_sql_query(cpc_query, cpc_connection)
     cpc_dataframe = cpc_dataframe.rename(columns = {"Website" : "url", "State" : "state"})
 
-    # these lines normalize the data contained in the "state" field
+    # these lines normalize the data contained in the "state" field so that state abbreviation can be used to join with 
+    # state level policy data from the api
     cpc_dataframe["state"] = cpc_dataframe["state"].str[-4:]
     cpc_dataframe["state"] = cpc_dataframe["state"].str.replace(r'[()]',"", regex = True)
 
@@ -108,7 +111,6 @@ def real_clinic_db_to_df(real_clinic_db_path):
     hpc_connection.close()
 
     return hpc_dataframe
-    
 
 
 def policyapi_db_to_df(api_db_path):
@@ -150,8 +152,11 @@ def policyapi_db_to_df(api_db_path):
 
 def keyword_count(state, keyword):
     '''
-    Counts word frequencies for a user selected keyword 
-    for each real or fake clinic in a user selected state. 
+    Counts word frequencies for a user selected keyword for each real or fake clinic in a user selected state. 
+    The idea of this function is to be used as a sort of initial test in consultation with a policy expert to 
+    explore single word choices' differences in use (frequency) between fake and real clinic websites. It's an
+    initial way to continue the conversation with historians / strategists from the realm of the doctrinal / conceptual
+    into the quantitative. 
 
     Inputs:
         - State, in a 2 letter abbreviation please
@@ -189,8 +194,10 @@ def keyword_count(state, keyword):
     
 def fake_clinic_keyword_count_df_generator(state, keyword):
     '''
-    Counts word frequencies for a selected keyword 
-    for each FAKE clinic in a selected state. 
+    Counts word frequencies for a selected keyword for each FAKE clinic in a selected state. 
+    Note: I kept real and fake functions separate here anticipating that in the future, it may be useful to add to these 
+    dataframes separately. Compared to an if statement within one function or other design, this is more cleanly accessible 
+    for future changes (to me at least). 
 
     Inputs:
         - State, in a 2 letter abbreviation
@@ -208,14 +215,18 @@ def fake_clinic_keyword_count_df_generator(state, keyword):
 
     cpc_token_df = pandas.read_sql_query(token_query, cpc_token_connection)
 
-    # explain what this does to my unfortunate future self
+    # Ok, yes this is ugly, and there was likely a better way to do this from the outset, but the way we stored keyword counts initially 
+    # directly enabled our visualizations across fake vs real clinics and across states, so at some point the data had to be transformed to 
+    # counts by specific term or vice versa. That's what this block does: loops each row (website) in a state, then loops each of the term
+    # and term count columns (which happen to be token1, count1 in our db) for the top 100 most frequent tokens per website. within these 
+    # token and token count columns (which are unique for each url or row), this constructs a dataframe that standardizes a single column 
+    # called the keyword (i.e.: the word "ultrasound"), and fills in the entries in that column coresponding to the number of times that 
+    # token / keyword was used in the scraped data of each website. 
     for i in range(0, cpc_token_df.shape[0]):
         for j in range(1, 200):
             if cpc_token_df.iloc[i]["token"+str(j)] == keyword:
                 urls.append(cpc_token_df.iloc[i]["url"])
-                counts.append(cpc_token_df.iloc[i]["count"+str(j)])
-                print(urls, counts)
-        
+                counts.append(cpc_token_df.iloc[i]["count"+str(j)])    
     
     fake_clinics_tokens_df = pandas.DataFrame(counts, columns = [keyword], index = urls)
 
@@ -242,21 +253,28 @@ def real_clinic_keyword_count_df_generator(state, keyword):
 
     hpc_token_df = pandas.read_sql_query(token_query, hpc_token_connection)
 
-    # explain what this does to my unfortunate future self
+    # This does the same thing as the previous loop in the previous function, only it does it for real clinics. I separated the two functions
+    # for ease of modification later, when I expect we will want to do different things with the fake and real term count dataframes. See comment in 
+    # the previous function for explanation of the loop. 
     for i in range(0, hpc_token_df.shape[0]):
         for j in range(1, 200):
             if hpc_token_df.iloc[i]["token"+str(j)] == keyword:
                 urls.append(hpc_token_df.iloc[i]["url"])
                 counts.append(hpc_token_df.iloc[i]["count"+str(j)])
-                print(urls, counts)
         
-    
     real_clinics_tokens_df = pandas.DataFrame(counts, columns = [keyword], index = urls)
-
 
     return real_clinics_tokens_df
 
 def fake_and_real_keyword_across_states(keyword):
+    '''
+    Creates a dataframe of frequencies for a selected keyword across both real and fake clinics across all states in the data.
+
+    Inputs:
+        - a keyword you are interested in extracting use use frequency data from
+    
+    Returns keyword_count_df containing the frequency they keyword was used across real and fake clinics for all states in the data. 
+    '''
 
     keyword_count_df = pandas.DataFrame()
 
