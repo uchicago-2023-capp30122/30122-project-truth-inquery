@@ -26,5 +26,6 @@ where keyword is the word you're interested in using as an analysis term. We che
 
 3. Finally, all of the graph output is generated using, 
 ```python
-poetry run python truth_inquery/crawler/graphs.py 15
+poetry run python truth_inquery/crawler/graphs.py int
 ```
+where int refers to the number of edges in a single-clinic graph. Our output uses 15.
