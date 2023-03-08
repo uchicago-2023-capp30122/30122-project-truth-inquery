@@ -12,7 +12,8 @@ from urllib.parse import urlparse
 
 api_key = "########"
 
-dir_path = "../30122-project-truth-inquery/truth_inquery/database_model" 
+# dir_path = "../30122-project-truth-inquery/truth_inquery/database_model" 
+dir_path = "truth_inquery/database_model"
 
 relative_urls = ["/v1/gestational_limits/states/", 
                 "/v1/insurance_coverage/states/", 
