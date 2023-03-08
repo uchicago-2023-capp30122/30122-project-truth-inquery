@@ -2,7 +2,7 @@ from database_model.api_requests import convert_json_csv
 from database_model.database import *
 from analysis_model.lpm import analyze
 from analysis_model.dataframe_cleaner import *
-
+import sys
 
 if __name__ == "__main__":
 
