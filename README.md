@@ -1,5 +1,7 @@
 # Project Truth InQuery
 
+We leveraged existing data from Expose Fake Clinics <https://www.exposefakeclinics.com>
+
 ## Installation
 After cloning the repo, you can set up the project as follows:
 
