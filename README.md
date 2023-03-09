@@ -1,8 +1,9 @@
 # Project Truth InQuery
 
-We leveraged existing data from [Expose Fake Clinics](https://www.exposefakeclinics.com) that contains information on Crisis Pregnancy Centers (CPCs) by U.S. state. We downloaded the data and used the CPC zip codes to collect the website and other information on nearby legitimate healthcare providers that provide abortion among other family planning health services. We crawl the websites of CPCs and the legitimate clinics we refer to as HPCs to identify the top terms in both sets of URLs.
+## Description
+We download data from [Expose Fake Clinics](https://www.exposefakeclinics.com) that contains information on Crisis Pregnancy Centers (CPCs) by U.S. state. We CPC zip codes to collect the website and other information on nearby legitimate healthcare providers that provide abortion and other family planning health services. We crawl the websites of CPCs and the legitimate clinics (referred to as HPCs) to identify the top terms in both sets of URLs.
 
-We also use data from the [Abortion Policy API](https://www.abortionpolicyapi.com). These data are include state-level policy indicators and other measures of abortion care access in the state. Using these two data sources, our goal was to train a model that could classify a URL as a CPC or not.
+We also use data from the [Abortion Policy API](https://www.abortionpolicyapi.com). These data are include state-level policy indicators and other measures of abortion care access in the state. Using these data sources, our goal was to train a model that could classify a URL as a CPC or not.
 
 ## Installation
 After cloning the repo, you can set up the project as follows:
